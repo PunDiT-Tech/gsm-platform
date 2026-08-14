@@ -63,6 +63,8 @@ php artisan test
 - `docs/PERFORMANCE-AUDIT.md`
 - `docs/SCALABILITY-AUDIT.md`
 - `docs/CODE-QUALITY-AUDIT.md`
+- `docs/SPEC-COMPLIANCE-AUDIT.md`
+- `docs/NOVICE-DEPLOYMENT-GUIDE.md`
 
 ## Security notes
 
