@@ -79,6 +79,83 @@ class CouponTest extends TestCase
         $this->assertEquals(85.00, (float) $order->price_snapshot);
     }
 
+    protected function trackingTokenOf(\Illuminate\Testing\TestResponse $response): string
+    {
+        $segments = explode('/', rtrim((string) parse_url($response->headers->get('Location'), PHP_URL_PATH), '/'));
+
+        return (string) end($segments);
+    }
+
+    public function test_confirmation_page_shows_coupon_discount(): void
+    {
+        Coupon::create(['code' => 'SAVE10', 'type' => 'PERCENT', 'value' => 10, 'is_active' => true]);
+
+        $response = $this->placeOrder('SAVE10');
+        $order = Order::firstOrFail();
+
+        $this->get(route('orders.confirmation', [$order->order_number, $this->trackingTokenOf($response)]))
+            ->assertOk()
+            ->assertSee('SAVE10')
+            ->assertSee('-USD 10.00')
+            ->assertSee('Total paid');
+    }
+
+    public function test_track_page_shows_coupon_discount(): void
+    {
+        Coupon::create(['code' => 'SAVE10', 'type' => 'PERCENT', 'value' => 10, 'is_active' => true]);
+
+        $response = $this->placeOrder('SAVE10');
+        $order = Order::firstOrFail();
+
+        $this->post(route('order.lookup.submit'), [
+            'order_number' => $order->order_number,
+            'tracking_token' => $this->trackingTokenOf($response),
+        ])->assertOk()
+            ->assertSee('SAVE10')
+            ->assertSee('discount: -USD 10.00');
+    }
+
+    public function test_admin_order_show_displays_coupon(): void
+    {
+        $this->seed(\Database\Seeders\RolePermissionSeeder::class);
+
+        $admin = User::factory()->create(['email' => 'boss@example.com', 'email_verified_at' => now()]);
+        $admin->roles()->attach(\App\Models\Role::where('name', 'SUPER_ADMIN')->firstOrFail());
+
+        Coupon::create(['code' => 'SAVE10', 'type' => 'PERCENT', 'value' => 10, 'is_active' => true]);
+
+        $this->placeOrder('SAVE10');
+        $order = Order::firstOrFail();
+
+        $this->actingAs($admin)->get(route('admin.orders.show', $order))
+            ->assertOk()
+            ->assertSee('SAVE10')
+            ->assertSee('-USD 10.00');
+    }
+
+    public function test_customer_order_show_displays_coupon(): void
+    {
+        $user = User::factory()->create(['email' => 'member@example.com', 'email_verified_at' => now()]);
+        Customer::create(['user_id' => $user->id, 'name' => $user->name, 'email' => $user->email, 'phone' => $user->phone]);
+
+        Coupon::create(['code' => 'SAVE10', 'type' => 'PERCENT', 'value' => 10, 'is_active' => true]);
+
+        $this->actingAs($user)->post(route('orders.store'), [
+            'service_slug' => 'diagnostic',
+            'customer_lookup' => 'account',
+            'fields' => [1 => '123456789012345'],
+            'consent' => '1',
+            'coupon_code' => 'SAVE10',
+        ]);
+
+        $order = Order::firstOrFail();
+
+        $this->actingAs($user)->get(route('orders.show', $order))
+            ->assertOk()
+            ->assertSee('SAVE10')
+            ->assertSee('discount: -USD 10.00');
+    }
+
     public function test_invalid_coupon_rejected(): void
     {
         $this->placeOrder('NOPE')->assertSessionHasErrors('coupon_code');

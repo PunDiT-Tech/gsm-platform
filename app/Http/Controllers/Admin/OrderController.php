@@ -38,6 +38,7 @@ class OrderController extends Controller
         $order->load([
             'customer',
             'service',
+            'couponUsage',
             'fieldValues',
             'statusHistory.user',
             'messages.user',

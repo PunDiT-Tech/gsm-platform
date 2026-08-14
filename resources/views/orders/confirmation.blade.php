@@ -25,6 +25,25 @@
                 <span class="text-sm text-gray-500">Status</span>
                 <span class="px-2 py-0.5 rounded-full text-xs bg-blue-100 text-blue-700">{{ str_replace('_', ' ', $order->status) }}</span>
             </div>
+            <div class="border-t pt-4 space-y-2">
+                <div class="flex justify-between items-center">
+                    <span class="text-sm text-gray-500">Service type</span>
+                    <span class="font-medium text-gray-900">{{ str_replace('_', ' ', $order->service?->service_type ?? 'STANDARD') }}</span>
+                </div>
+                @if ($order->coupon_code)
+                    @php
+                        $usage = $order->couponUsage;
+                    @endphp
+                    <div class="flex justify-between items-center text-green-700">
+                        <span class="text-sm">Discount ({{ $order->coupon_code }})</span>
+                        <span>-{{ $order->currency_snapshot }} {{ number_format((float) ($usage?->discount_amount ?? 0), 2) }}</span>
+                    </div>
+                @endif
+                <div class="flex justify-between items-center font-bold text-lg pt-2 border-t">
+                    <span class="text-gray-900">Total paid</span>
+                    <span class="text-gray-900">{{ $order->currency_snapshot }} {{ number_format((float) $order->price_snapshot, 2) }}</span>
+                </div>
+            </div>
         </div>
 
         <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center">

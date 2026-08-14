@@ -30,7 +30,7 @@ class OrderController extends Controller
     public function confirmation(string $order, string $token)
     {
         $orderModel = \App\Models\Order::where('order_number', $order)
-            ->with(['statusHistory'])
+            ->with(['statusHistory', 'couponUsage', 'service'])
             ->firstOrFail();
 
         if (! \Illuminate\Support\Facades\Hash::check($token, $orderModel->tracking_token)) {

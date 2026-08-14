@@ -24,6 +24,10 @@
                 <dl class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                     <div><dt class="text-gray-500">Service</dt><dd class="font-medium">{{ $order->service_name_snapshot }}</dd></div>
                     <div><dt class="text-gray-500">Amount</dt><dd class="font-medium">{{ $order->currency_snapshot }} {{ number_format((float) $order->price_snapshot, 2) }}</dd></div>
+                    @if ($order->coupon_code)
+                        <div><dt class="text-gray-500">Coupon</dt><dd class="font-medium">{{ $order->coupon_code }}</dd></div>
+                        <div><dt class="text-gray-500">Discount</dt><dd class="font-medium text-green-700">-{{ $order->currency_snapshot }} {{ number_format((float) ($order->couponUsage?->discount_amount ?? 0), 2) }}</dd></div>
+                    @endif
                     <div><dt class="text-gray-500">Customer</dt><dd class="font-medium">{{ $order->customer_name }}</dd></div>
                     <div><dt class="text-gray-500">Email</dt><dd class="font-medium">{{ $order->customer_email }}</dd></div>
                     <div><dt class="text-gray-500">Phone</dt><dd class="font-medium">{{ $order->customer_phone }}</dd></div>

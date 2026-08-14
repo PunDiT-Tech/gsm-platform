@@ -34,6 +34,9 @@
         <div class="bg-white border border-gray-200 rounded-lg p-4">
             <p class="text-xs text-gray-500 uppercase">Amount</p>
             <p class="font-medium mt-1">{{ $order->currency_snapshot }} {{ number_format((float) $order->price_snapshot, 2) }}</p>
+            @if ($order->coupon_code)
+                <p class="text-xs text-gray-500 mt-1">Coupon: {{ $order->coupon_code }} (discount: -{{ $order->currency_snapshot }} {{ number_format((float) ($order->couponUsage?->discount_amount ?? 0), 2) }})</p>
+            @endif
         </div>
     </div>
 

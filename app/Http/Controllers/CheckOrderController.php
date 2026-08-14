@@ -22,7 +22,7 @@ class CheckOrderController extends Controller
         ]);
 
         $order = Order::where('order_number', $request->order_number)
-            ->with(['service', 'statusHistory', 'messages' => fn ($q) => $q->where('type', '!=', 'INTERNAL'), 'results'])
+            ->with(['service', 'statusHistory', 'messages' => fn ($q) => $q->where('type', '!=', 'INTERNAL'), 'results', 'couponUsage'])
             ->first();
 
         if (! $order || ! Hash::check($request->tracking_token, $order->tracking_token)) {

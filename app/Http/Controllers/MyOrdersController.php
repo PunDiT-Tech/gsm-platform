@@ -32,6 +32,7 @@ class MyOrdersController extends Controller
             'results',
             'payments.method',
             'fieldValues',
+            'couponUsage',
         ]);
 
         return view('orders.show', compact('order'));

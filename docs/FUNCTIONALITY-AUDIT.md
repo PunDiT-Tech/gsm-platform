@@ -29,7 +29,7 @@ Status of each major feature.
 | Support system | PASS | Tickets with attachments, admin assignment |
 | FAQ | PASS | Categories, ordering |
 | Refunds | PARTIAL | Record table + structure; processing is manual |
-| Coupons | NOT STARTED | Architecture designed for future; not in V1 |
+| Coupons | PASS | Percent/fixed discounts, usage limits, per-customer limits, expiry, admin management |
 | Customer consent | PASS | Configurable consent checkbox |
 | SEO | PASS | Sitemap, meta tags, clean URLs |
 | Legal pages | PASS | Terms/Privacy/Refunds/Acceptable Use |
@@ -43,5 +43,5 @@ Status of each major feature.
 
 ## Notes
 - Refunds are recorded manually as specified ("Initial implementation may be manual").
-- Coupons are designed (Stage 35) but intentionally not implemented in V1 to keep order architecture stable.
+- Coupons are fully implemented (Stage 35): percent/fixed discounts, usage limits, per-customer limits, expiry, admin management.
 - Real email/Telegram delivery requires production SMTP/Telegram credentials.
