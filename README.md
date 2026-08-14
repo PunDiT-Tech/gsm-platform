@@ -53,11 +53,15 @@ php artisan test
 - `docs/ROUTE-MAP.md`
 - `docs/PERMISSION-MATRIX.md`
 - `docs/STAGED-PLAN.md`
+- `docs/INSTALLATION.md`
 - `docs/DEPLOYMENT.md`
+- `docs/BACKUP-RESTORE.md`
+- `docs/TROUBLESHOOTING.md`
 - `docs/SECURITY-AUDIT.md`
 - `docs/FUNCTIONALITY-AUDIT.md`
+- `docs/PERFORMANCE-AUDIT.md`
 - `docs/SCALABILITY-AUDIT.md`
-- `docs/INSTALLATION.md`
+- `docs/CODE-QUALITY-AUDIT.md`
 
 ## Security notes
 
