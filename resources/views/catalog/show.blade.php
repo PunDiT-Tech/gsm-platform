@@ -107,6 +107,12 @@
                             @csrf
                             <input type="hidden" name="service_slug" value="{{ $service->slug }}">
 
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Coupon code <span class="text-gray-400">(optional)</span></label>
+                                <input type="text" name="coupon_code" value="{{ old('coupon_code') }}" placeholder="e.g. SAVE10"
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm uppercase">
+                            </div>
+
                             @auth
                                 <input type="hidden" name="customer_lookup" value="account">
                             @else

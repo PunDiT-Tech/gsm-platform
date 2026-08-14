@@ -38,12 +38,15 @@ class OrderService
 
         $customer = $this->resolveCustomer($data, $user);
 
-        $price = $service->service_type === 'FREE' ? 0 : (float) $service->price;
+        $coupon = app(CouponService::class)->resolve($data['coupon_code'] ?? null, $customer);
+
+        $basePrice = $service->service_type === 'FREE' ? 0 : (float) $service->price;
+        $price = app(CouponService::class)->applyDiscount($basePrice, $coupon);
         $paymentRequired = $service->service_type === 'PAID' || ($service->service_type === 'STANDARD' && $service->payment_required) || $price > 0;
 
         $trackingToken = Str::random(40);
 
-        $order = DB::transaction(function () use ($service, $customer, $data, $price, $paymentRequired, $trackingToken) {
+        $order = DB::transaction(function () use ($service, $customer, $data, $price, $paymentRequired, $trackingToken, $coupon) {
             $order = Order::create([
                 'order_number' => $this->generateOrderNumber(),
                 'tracking_token' => Hash::make($trackingToken),
@@ -57,7 +60,7 @@ class OrderService
                 'customer_name' => $customer->name,
                 'customer_email' => $customer->email,
                 'customer_phone' => $customer->phone,
-                'coupon_code' => $data['coupon_code'] ?? null,
+                'coupon_code' => $coupon?->code ?? null,
                 'expires_at' => $paymentRequired ? now()->addHours((int) config('app.order_expiry_hours', 24)) : null,
             ]);
 
@@ -101,6 +104,10 @@ class OrderService
 
             return $order;
         });
+
+        if ($coupon) {
+            app(CouponService::class)->recordUsage($order, $coupon, $basePrice);
+        }
 
         $order->tracking_code_plain = $trackingToken;
 

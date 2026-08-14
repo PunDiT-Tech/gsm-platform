@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AnnouncementController;
 use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\CouponController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\FaqController;
@@ -114,6 +115,12 @@ Route::prefix('admin')->middleware(['auth', 'verified', 'role:SUPER_ADMIN,ADMIN,
 
     // Audit logs
     Route::get('/audit-logs', [AuditLogController::class, 'index'])->middleware('permission:audit_logs.view')->name('admin.audit-logs.index');
+
+    // Coupons
+    Route::get('/coupons', [CouponController::class, 'index'])->middleware('permission:settings.manage')->name('admin.coupons.index');
+    Route::post('/coupons', [CouponController::class, 'store'])->middleware('permission:settings.manage')->name('admin.coupons.store');
+    Route::put('/coupons/{coupon}', [CouponController::class, 'update'])->middleware('permission:settings.manage')->name('admin.coupons.update');
+    Route::delete('/coupons/{coupon}', [CouponController::class, 'destroy'])->middleware('permission:settings.manage')->name('admin.coupons.destroy');
 
     // System health
     Route::get('/system', [SystemController::class, 'index'])->middleware('permission:settings.manage')->name('admin.system.index');

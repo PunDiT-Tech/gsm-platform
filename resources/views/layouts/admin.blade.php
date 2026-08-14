@@ -29,6 +29,7 @@
                             ['route' => 'admin.faq.index', 'label' => 'FAQ', 'icon' => '❓', 'permission' => 'homepage.manage'],
                             ['route' => 'admin.telegram.index', 'label' => 'Telegram', 'icon' => '✈️', 'permission' => 'telegram.manage'],
                             ['route' => 'admin.reports.index', 'label' => 'Reports', 'icon' => '📈', 'permission' => 'reports.view'],
+                            ['route' => 'admin.coupons.index', 'label' => 'Coupons', 'icon' => '🏷️', 'permission' => 'settings.manage'],
                             ['route' => 'admin.staff.index', 'label' => 'Admin Users', 'icon' => '🛡️', 'permission' => 'admins.manage'],
                             ['route' => 'admin.settings.index', 'label' => 'Settings', 'icon' => '⚙️', 'permission' => 'settings.manage'],
                             ['route' => 'admin.system.index', 'label' => 'System', 'icon' => '🖥️', 'permission' => 'settings.manage'],
