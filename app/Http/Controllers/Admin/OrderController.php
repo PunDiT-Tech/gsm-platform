@@ -80,6 +80,8 @@ class OrderController extends Controller
             ]);
         });
 
+        \App\Helpers\AuditLogger::log('order.status-change', $order, ['status' => $from], ['status' => $request->status]);
+
         $this->notifyCustomer($order, 'Order ' . str_replace('_', ' ', $request->status), 'Your order status changed to ' . str_replace('_', ' ', $request->status) . '.');
 
         $event = match ($request->status) {

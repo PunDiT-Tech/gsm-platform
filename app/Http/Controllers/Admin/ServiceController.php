@@ -30,7 +30,8 @@ class ServiceController extends Controller
     {
         $data = $this->validateData($request);
 
-        Service::create($data);
+        $service = Service::create($data);
+        \App\Helpers\AuditLogger::log('service.create', $service);
 
         return redirect()->route('admin.services.index')->with('status', 'Service created.');
     }
@@ -47,6 +48,7 @@ class ServiceController extends Controller
     {
         $data = $this->validateData($request, $service->id);
 
+        \App\Helpers\AuditLogger::log('service.update', $service, $service->toArray(), $data);
         $service->update($data);
 
         return redirect()->route('admin.services.index')->with('status', 'Service updated.');
@@ -54,6 +56,7 @@ class ServiceController extends Controller
 
     public function destroy(Service $service): RedirectResponse
     {
+        \App\Helpers\AuditLogger::log('service.delete', $service);
         $service->delete();
 
         return redirect()->route('admin.services.index')->with('status', 'Service deleted (soft).');

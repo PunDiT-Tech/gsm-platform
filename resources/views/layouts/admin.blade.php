@@ -15,39 +15,35 @@
         <aside class="w-60 bg-gray-900 text-gray-300 shrink-0 hidden lg:block">
             <div class="px-5 py-5 text-white font-bold text-lg border-b border-gray-800">{{ config('app.name') }} <span class="text-blue-400 text-xs align-top">Admin</span></div>
             <nav class="p-3 space-y-0.5 text-sm">
-                @php
-                    $items = [
-                        ['route' => 'admin.dashboard', 'label' => 'Dashboard', 'icon' => '📊'],
-                        ['route' => 'admin.orders.index', 'label' => 'Orders', 'icon' => '🧾'],
-                        ['route' => 'admin.services.index', 'label' => 'Services', 'icon' => '🔧'],
-                        ['route' => 'admin.categories.index', 'label' => 'Categories', 'icon' => '🗂️'],
-                        ['route' => 'admin.payments.index', 'label' => 'Payments', 'icon' => '💳'],
-                        ['route' => 'admin.customers.index', 'label' => 'Customers', 'icon' => '👥'],
-                        ['route' => 'admin.support.index', 'label' => 'Support', 'icon' => '🎧'],
-                        ['route' => 'admin.homepage.index', 'label' => 'Homepage', 'icon' => '🏠'],
-                        ['route' => 'admin.announcements.index', 'label' => 'Announcements', 'icon' => '📢'],
-                        ['route' => 'admin.faq.index', 'label' => 'FAQ', 'icon' => '❓'],
-                        ['route' => 'admin.telegram.index', 'label' => 'Telegram', 'icon' => '✈️'],
-                        ['route' => 'admin.reports.index', 'label' => 'Reports', 'icon' => '📈'],
-                        ['route' => 'admin.staff.index', 'label' => 'Admin Users', 'icon' => '🛡️'],
-                        ['route' => 'admin.settings.index', 'label' => 'Settings', 'icon' => '⚙️'],
-                        ['route' => 'admin.audit-logs.index', 'label' => 'Audit Logs', 'icon' => '📋'],
-                    ];
-                @endphp
-                @foreach ($items as $item)
-                    @php $active = request()->routeIs($item['route'] . '*'); @endphp
-                    @if (auth()->user()->hasAnyPermission([
-                            'orders.view', 'services.view', 'payments.view', 'customers.view',
-                            'support.view', 'homepage.manage', 'announcements.manage', 'telegram.manage',
-                            'reports.view', 'admins.manage', 'settings.manage', 'audit_logs.view',
-                            'users.view',
-                        ]))
-                        <a href="{{ route($item['route']) }}"
-                           class="flex items-center gap-2 px-3 py-2 rounded-md {{ $active ? 'bg-gray-800 text-white' : 'hover:bg-gray-800 hover:text-white' }}">
-                            <span>{{ $item['icon'] }}</span> {{ $item['label'] }}
-                        </a>
-                    @endif
-                @endforeach
+                    @php
+                        $items = [
+                            ['route' => 'admin.dashboard', 'label' => 'Dashboard', 'icon' => '📊', 'permission' => null],
+                            ['route' => 'admin.orders.index', 'label' => 'Orders', 'icon' => '🧾', 'permission' => 'orders.view'],
+                            ['route' => 'admin.services.index', 'label' => 'Services', 'icon' => '🔧', 'permission' => 'services.view'],
+                            ['route' => 'admin.categories.index', 'label' => 'Categories', 'icon' => '🗂️', 'permission' => 'services.view'],
+                            ['route' => 'admin.payments.index', 'label' => 'Payments', 'icon' => '💳', 'permission' => 'payments.view'],
+                            ['route' => 'admin.customers.index', 'label' => 'Customers', 'icon' => '👥', 'permission' => 'customers.view'],
+                            ['route' => 'admin.support.index', 'label' => 'Support', 'icon' => '🎧', 'permission' => 'support.view'],
+                            ['route' => 'admin.homepage.index', 'label' => 'Homepage', 'icon' => '🏠', 'permission' => 'homepage.manage'],
+                            ['route' => 'admin.announcements.index', 'label' => 'Announcements', 'icon' => '📢', 'permission' => 'announcements.manage'],
+                            ['route' => 'admin.faq.index', 'label' => 'FAQ', 'icon' => '❓', 'permission' => 'homepage.manage'],
+                            ['route' => 'admin.telegram.index', 'label' => 'Telegram', 'icon' => '✈️', 'permission' => 'telegram.manage'],
+                            ['route' => 'admin.reports.index', 'label' => 'Reports', 'icon' => '📈', 'permission' => 'reports.view'],
+                            ['route' => 'admin.staff.index', 'label' => 'Admin Users', 'icon' => '🛡️', 'permission' => 'admins.manage'],
+                            ['route' => 'admin.settings.index', 'label' => 'Settings', 'icon' => '⚙️', 'permission' => 'settings.manage'],
+                            ['route' => 'admin.system.index', 'label' => 'System', 'icon' => '🖥️', 'permission' => 'settings.manage'],
+                            ['route' => 'admin.audit-logs.index', 'label' => 'Audit Logs', 'icon' => '📋', 'permission' => 'audit_logs.view'],
+                        ];
+                    @endphp
+                    @foreach ($items as $item)
+                        @if ($item['permission'] === null || auth()->user()->hasPermission($item['permission']))
+                            @php $active = request()->routeIs($item['route'] . '*'); @endphp
+                            <a href="{{ route($item['route']) }}"
+                               class="flex items-center gap-2 px-3 py-2 rounded-md {{ $active ? 'bg-gray-800 text-white' : 'hover:bg-gray-800 hover:text-white' }}">
+                                <span>{{ $item['icon'] }}</span> {{ $item['label'] }}
+                            </a>
+                        @endif
+                    @endforeach
             </nav>
         </aside>
 

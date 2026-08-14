@@ -10,6 +10,8 @@
                     class="px-4 py-2 rounded-md {{ request()->routeIs('orders.*') ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100' }}">My Orders</a>
                 <a href="{{ route('notifications.index') }}"
                     class="px-4 py-2 rounded-md {{ request()->routeIs('notifications.*') ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100' }}">Notifications</a>
+                <a href="{{ route('support.index') }}"
+                    class="px-4 py-2 rounded-md {{ request()->routeIs('support.*') ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100' }}">Support</a>
                 <a href="{{ route('profile.edit') }}"
                     class="px-4 py-2 rounded-md {{ request()->routeIs('profile.edit') ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100' }}">Profile</a>
                 <a href="{{ route('profile.security') }}"

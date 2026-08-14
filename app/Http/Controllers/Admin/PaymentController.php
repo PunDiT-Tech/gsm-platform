@@ -43,6 +43,7 @@ class PaymentController extends Controller
 
         $this->notify($payment->order, 'Payment verified', 'Your payment has been verified. We will begin processing your order.');
         \App\Jobs\SendTelegramOrderNotification::dispatch($payment->order, 'payment_verified');
+        \App\Helpers\AuditLogger::log('payment.verify', $payment);
 
         return back()->with('status', 'Payment verified.');
     }
@@ -61,6 +62,7 @@ class PaymentController extends Controller
 
         $this->notify($payment->order, 'Payment rejected', 'Your payment proof was rejected. Please check your order and resubmit a valid proof.');
         \App\Jobs\SendTelegramOrderNotification::dispatch($payment->order, 'payment_rejected');
+        \App\Helpers\AuditLogger::log('payment.reject', $payment);
 
         return back()->with('status', 'Payment rejected.');
     }

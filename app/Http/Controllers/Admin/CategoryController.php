@@ -27,7 +27,8 @@ class CategoryController extends Controller
     {
         $data = $this->validateData($request);
 
-        ServiceCategory::create($data);
+        $category = ServiceCategory::create($data);
+        \App\Helpers\AuditLogger::log('category.create', $category);
 
         return redirect()->route('admin.categories.index')->with('status', 'Category created.');
     }
@@ -41,6 +42,7 @@ class CategoryController extends Controller
     {
         $data = $this->validateData($request, $category->id);
 
+        \App\Helpers\AuditLogger::log('category.update', $category, $category->toArray(), $data);
         $category->update($data);
 
         return redirect()->route('admin.categories.index')->with('status', 'Category updated.');
@@ -52,6 +54,7 @@ class CategoryController extends Controller
             return back()->withErrors(['category' => 'This category has services. Move or delete them first to avoid corrupting history.']);
         }
 
+        \App\Helpers\AuditLogger::log('category.delete', $category);
         $category->delete();
 
         return redirect()->route('admin.categories.index')->with('status', 'Category deleted.');

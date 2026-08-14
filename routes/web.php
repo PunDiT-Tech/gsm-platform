@@ -16,6 +16,8 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\SitemapController;
+use App\Http\Controllers\SupportTicketController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -33,6 +35,7 @@ Route::get('/orders/{order}/{token}', [OrderController::class, 'confirmation'])-
 Route::get('/orders/{order}/{token}/pay', [PaymentController::class, 'show'])->name('orders.payment');
 Route::post('/orders/{order}/payment', [PaymentController::class, 'upload'])->middleware('throttle:uploads')->name('orders.payment.upload');
 
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 require __DIR__ . '/admin.php';
 
 Route::get('/{slug}', [HomeController::class, 'page'])->whereIn('slug', ['terms', 'privacy', 'refunds', 'acceptable-use'])->name('page');
@@ -66,6 +69,11 @@ Route::middleware('auth')->group(function () {
     Route::get('dashboard/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('dashboard/notifications/{id}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
     Route::post('dashboard/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.readAll');
+
+    Route::get('dashboard/support', [SupportTicketController::class, 'index'])->name('support.index');
+    Route::post('dashboard/support', [SupportTicketController::class, 'store'])->middleware('throttle:support')->name('support.store');
+    Route::get('dashboard/support/{ticket}', [SupportTicketController::class, 'show'])->name('support.show');
+    Route::post('dashboard/support/{ticket}/reply', [SupportTicketController::class, 'reply'])->middleware('throttle:support')->name('support.reply');
 
     Route::get('verify-email', EmailVerificationPromptController::class)->name('verification.notice');
     Route::get('verify-email/{id}/{hash}', VerifyEmailController::class)->middleware(['signed', 'throttle:6,1'])->name('verification.verify');

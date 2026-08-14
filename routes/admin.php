@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\Admin\SupportController;
+use App\Http\Controllers\Admin\SystemController;
 use App\Http\Controllers\Admin\TelegramController;
 use Illuminate\Support\Facades\Route;
 
@@ -113,4 +114,7 @@ Route::prefix('admin')->middleware(['auth', 'verified', 'role:SUPER_ADMIN,ADMIN,
 
     // Audit logs
     Route::get('/audit-logs', [AuditLogController::class, 'index'])->middleware('permission:audit_logs.view')->name('admin.audit-logs.index');
+
+    // System health
+    Route::get('/system', [SystemController::class, 'index'])->middleware('permission:settings.manage')->name('admin.system.index');
 });

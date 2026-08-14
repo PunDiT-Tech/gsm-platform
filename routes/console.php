@@ -1,8 +1,11 @@
 <?php
 
-use Illuminate\Foundation\Inspiring;
-use Illuminate\Support\Facades\Artisan;
+use App\Commands\ExpireUnpaidOrders;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Schedule;
 
-Artisan::command('inspire', function () {
-    $this->comment(Inspiring::quote());
-})->purpose('Display an inspiring quote');
+Schedule::command(ExpireUnpaidOrders::class)->everyFifteenMinutes();
+
+Schedule::call(function () {
+    Cache::put('scheduler-last-run', now(), 3600);
+})->everyFiveMinutes();
