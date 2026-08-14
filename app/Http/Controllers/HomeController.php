@@ -14,10 +14,10 @@ class HomeController extends Controller
 {
     public function index(): View
     {
-        $showcases = HomepageShowcase::where('is_active', true)->orderBy('sort_order')->get();
+        $showcases = HomepageShowcase::where('is_active', true)->with('service')->orderBy('sort_order')->get();
         $announcements = Announcement::active('homepage')->latest()->limit(3)->get();
         $featuredServices = Service::public()->where('is_featured', true)->with('category')->limit(8)->get();
-        $categories = ServiceCategory::where('is_active', true)->orderBy('sort_order')->limit(8)->get();
+        $categories = ServiceCategory::where('is_active', true)->withCount('services')->orderBy('sort_order')->limit(8)->get();
         $faqs = Faq::where('is_active', true)->orderBy('sort_order')->limit(6)->get();
 
         return view('home', compact('showcases', 'announcements', 'featuredServices', 'categories', 'faqs'));

@@ -142,6 +142,70 @@ class OrderFlowTest extends TestCase
         ])->assertSessionHasErrors('consent');
     }
 
+    public function test_consent_timestamp_is_persisted(): void
+    {
+        $this->post(route('orders.store'), [
+            'service_slug' => 'diagnostic',
+            'customer_lookup' => 'guest',
+            'customer_name' => 'Guest',
+            'customer_email' => 'guest@example.com',
+            'customer_phone' => '123456789',
+            'fields' => [1 => '123456789012345'],
+            'consent' => '1',
+        ]);
+
+        $order = Order::first();
+        $this->assertNotNull($order->consent_given_at);
+    }
+
+    public function test_invalid_serial_number_rejects_order(): void
+    {
+        ServiceField::create([
+            'service_id' => $this->service->id,
+            'label' => 'Serial',
+            'internal_name' => 'serial',
+            'type' => 'SERIAL_NUMBER',
+            'is_required' => true,
+            'sort_order' => 2,
+        ]);
+
+        $this->post(route('orders.store'), [
+            'service_slug' => 'diagnostic',
+            'customer_lookup' => 'guest',
+            'customer_name' => 'Guest',
+            'customer_email' => 'guest@example.com',
+            'customer_phone' => '123456789',
+            'fields' => [1 => '123456789012345', 2 => '!!bad serial!!'],
+            'consent' => '1',
+        ])->assertSessionHasErrors();
+
+        $this->assertDatabaseCount('orders', 0);
+    }
+
+    public function test_valid_serial_number_passes(): void
+    {
+        ServiceField::create([
+            'service_id' => $this->service->id,
+            'label' => 'Serial',
+            'internal_name' => 'serial',
+            'type' => 'SERIAL_NUMBER',
+            'is_required' => true,
+            'sort_order' => 2,
+        ]);
+
+        $this->post(route('orders.store'), [
+            'service_slug' => 'diagnostic',
+            'customer_lookup' => 'guest',
+            'customer_name' => 'Guest',
+            'customer_email' => 'guest@example.com',
+            'customer_phone' => '123456789',
+            'fields' => [1 => '123456789012345', 2 => 'SN-1234_AB'],
+            'consent' => '1',
+        ])->assertRedirect();
+
+        $this->assertDatabaseCount('orders', 1);
+    }
+
     public function test_tracking_token_is_verified_on_lookup(): void
     {
         $this->post(route('orders.store'), [

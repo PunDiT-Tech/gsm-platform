@@ -54,13 +54,13 @@
             @endif
         </div>
 
-        @if ($order->results->isNotEmpty())
+        @if ($order->status === 'COMPLETED' && $order->results->isNotEmpty())
             <div class="bg-white border border-gray-200 rounded-lg p-6 mb-8">
                 <h2 class="font-semibold text-gray-900 mb-4">Order result</h2>
                 @foreach ($order->results as $result)
                     <div class="border-t border-gray-100 pt-3 first:border-0 first:pt-0">
                         @if ($result->type === 'FILE')
-                            <a href="#" class="text-blue-600 text-sm hover:underline">Download file</a>
+                            <p class="text-sm text-gray-600">A file was included with this result. Log in to download it.</p>
                         @elseif ($result->type === 'LINK')
                             <a href="{{ $result->content }}" target="_blank" rel="noopener" class="text-blue-600 text-sm hover:underline">{{ $result->content }}</a>
                         @else

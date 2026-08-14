@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Helpers\AuditLogger;
 use App\Models\PaymentMethod;
 use App\Models\WebsiteSetting;
 use Illuminate\Http\RedirectResponse;
@@ -32,6 +33,7 @@ class SettingsController extends Controller
         WebsiteSetting::set('contact_email', $data['contact_email']);
         WebsiteSetting::set('contact_phone', $data['contact_phone']);
         WebsiteSetting::set('order_expiry_hours', $data['order_expiry_hours']);
+        AuditLogger::log('settings.update', null, null, $data);
 
         return back()->with('status', 'Settings saved.');
     }
@@ -50,6 +52,7 @@ class SettingsController extends Controller
         $config = array_filter($config, fn ($v) => ! is_null($v));
 
         $method->update($data + ['configuration' => $config]);
+        AuditLogger::log('payment_method.update', $method, null, $data + $config);
 
         return back()->with('status', 'Payment method updated.');
     }

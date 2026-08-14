@@ -22,6 +22,17 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-8">
             <div>
+                @if ($announcements->isNotEmpty())
+                    <div class="mb-6 space-y-3">
+                        @foreach ($announcements as $announcement)
+                            <div class="border border-gray-200 rounded-lg p-4 bg-white">
+                                <p class="font-medium text-gray-900 text-sm">{{ $announcement->title }}</p>
+                                <p class="text-sm text-gray-600 mt-1">{{ $announcement->message }}</p>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+
                 <div class="flex items-center gap-4 mb-4">
                     <span class="text-5xl">{{ $service->icon ?? '🔧' }}</span>
                     <div>

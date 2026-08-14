@@ -47,6 +47,15 @@
                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-sm">
             </div>
             <div>
+                <label class="block text-sm font-medium text-gray-700">Restrict to service <span class="text-gray-400">(optional)</span></label>
+                <select name="service_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-sm">
+                    <option value="">All services</option>
+                    @foreach ($services as $service)
+                        <option value="{{ $service->id }}">{{ $service->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
                 <label class="block text-sm font-medium text-gray-700">Expires at <span class="text-gray-400">(optional)</span></label>
                 <input type="datetime-local" name="expires_at"
                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-sm">
@@ -64,6 +73,7 @@
                     <th class="px-4 py-3 text-left text-gray-600 font-medium">Code</th>
                     <th class="px-4 py-3 text-left text-gray-600 font-medium">Type</th>
                     <th class="px-4 py-3 text-left text-gray-600 font-medium">Value</th>
+                    <th class="px-4 py-3 text-left text-gray-600 font-medium">Service</th>
                     <th class="px-4 py-3 text-left text-gray-600 font-medium">Used</th>
                     <th class="px-4 py-3 text-left text-gray-600 font-medium">Expires</th>
                     <th class="px-4 py-3 text-left text-gray-600 font-medium">Active</th>
@@ -76,6 +86,7 @@
                         <td class="px-4 py-3 font-mono font-medium">{{ $coupon->code }}</td>
                         <td class="px-4 py-3">{{ $coupon->type }}</td>
                         <td class="px-4 py-3">{{ $coupon->type === 'PERCENT' ? $coupon->value . '%' : '$' . $coupon->value }}</td>
+                        <td class="px-4 py-3 text-gray-500">{{ $coupon->service?->name ?? 'All services' }}</td>
                         <td class="px-4 py-3">{{ $coupon->usages_count }}@if ($coupon->usage_limit) / {{ $coupon->usage_limit }}@endif</td>
                         <td class="px-4 py-3 text-gray-500">{{ $coupon->expires_at?->format('M d, Y') ?? 'Never' }}</td>
                         <td class="px-4 py-3">
@@ -85,6 +96,7 @@
                                 <input type="hidden" name="code" value="{{ $coupon->code }}">
                                 <input type="hidden" name="type" value="{{ $coupon->type }}">
                                 <input type="hidden" name="value" value="{{ $coupon->value }}">
+                                <input type="hidden" name="service_id" value="{{ $coupon->service_id ?? '' }}">
                                 <button class="px-2 py-0.5 rounded-full text-xs {{ $coupon->is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}" name="is_active" value="1" onchange="this.form.submit()">{{ $coupon->is_active ? 'Active' : 'Inactive' }}</button>
                             </form>
                         </td>

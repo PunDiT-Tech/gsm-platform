@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Helpers\AuditLogger;
 use App\Models\HomepageShowcase;
 use App\Models\Service;
 use Illuminate\Http\RedirectResponse;
@@ -22,7 +23,8 @@ class HomepageController extends Controller
     public function storeShowcase(Request $request): RedirectResponse
     {
         $data = $this->validateShowcase($request);
-        HomepageShowcase::create($data);
+        $showcase = HomepageShowcase::create($data);
+        AuditLogger::log('homepage.showcase.create', $showcase, null, $data);
 
         return back()->with('status', 'Showcase slide added.');
     }
@@ -30,6 +32,7 @@ class HomepageController extends Controller
     public function updateShowcase(Request $request, HomepageShowcase $showcase): RedirectResponse
     {
         $showcase->update($this->validateShowcase($request));
+        AuditLogger::log('homepage.showcase.update', $showcase, null, $showcase->toArray());
 
         return back()->with('status', 'Showcase slide updated.');
     }
@@ -37,6 +40,7 @@ class HomepageController extends Controller
     public function destroyShowcase(HomepageShowcase $showcase): RedirectResponse
     {
         $showcase->delete();
+        AuditLogger::log('homepage.showcase.delete', $showcase, $showcase->toArray());
 
         return back()->with('status', 'Showcase slide deleted.');
     }

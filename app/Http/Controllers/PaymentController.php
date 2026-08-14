@@ -8,6 +8,7 @@ use App\Models\PaymentMethod;
 use App\Models\PaymentProof;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
@@ -51,21 +52,23 @@ class PaymentController extends Controller
             $filePath = $request->file('proof')->store('payment-proofs', 'local');
         }
 
-        PaymentProof::create([
-            'payment_id' => $payment->id,
-            'file_path' => $filePath,
-            'original_name' => $request->hasFile('proof') ? $request->file('proof')->getClientOriginalName() : null,
-            'mime_type' => $request->hasFile('proof') ? $request->file('proof')->getMimeType() : null,
-            'transaction_id' => $request->transaction_id,
-            'notes' => $request->notes,
-        ]);
+        DB::transaction(function () use ($payment, $order, $request, $filePath) {
+            PaymentProof::create([
+                'payment_id' => $payment->id,
+                'file_path' => $filePath,
+                'original_name' => $request->hasFile('proof') ? $request->file('proof')->getClientOriginalName() : null,
+                'mime_type' => $request->hasFile('proof') ? $request->file('proof')->getMimeType() : null,
+                'transaction_id' => $request->transaction_id,
+                'notes' => $request->notes,
+            ]);
 
-        if ($payment->status === 'UNPAID') {
-            $payment->update(['status' => 'PROOF_SUBMITTED']);
-        }
-        if (in_array($order->payment_status, ['UNPAID', 'REJECTED'])) {
-            $order->update(['payment_status' => 'PROOF_SUBMITTED']);
-        }
+            if ($payment->status === 'UNPAID') {
+                $payment->update(['status' => 'PROOF_SUBMITTED']);
+            }
+            if (in_array($order->payment_status, ['UNPAID', 'REJECTED'])) {
+                $order->update(['payment_status' => 'PROOF_SUBMITTED']);
+            }
+        });
 
         \App\Jobs\SendTelegramOrderNotification::dispatch($order, 'payment_proof');
 

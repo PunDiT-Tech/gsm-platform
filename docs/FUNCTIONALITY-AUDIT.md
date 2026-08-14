@@ -30,13 +30,13 @@ Status of each major feature.
 | Support system | PASS | Tickets with attachments, admin assignment |
 | FAQ | PASS | Categories, ordering |
 | Refunds | PARTIAL | Record table + structure; processing is manual |
-| Coupons | PASS | Percent/fixed discounts, usage limits, per-customer limits, expiry, admin management |
-| Customer consent | PASS | Configurable consent checkbox |
-| SEO | PASS | Sitemap, meta tags, clean URLs |
+| Coupons | PASS | Percent/fixed discounts, usage limits, per-customer limits, service restriction, expiry, admin management |
+| Customer consent | PASS | Configurable consent checkbox; consent value + timestamp persisted on the order |
+| SEO | PARTIAL | Sitemap, meta tags, clean URLs; canonical + Open Graph/Twitter meta not yet site-wide |
 | Legal pages | PASS | Terms/Privacy/Refunds/Acceptable Use |
 | Reports | PASS | Revenue/orders by service, payment methods, date range |
 | System health | PASS | DB, storage, queue, cache, scheduler, telegram, mail, disk |
-| Audit logging | PASS | Admin create/update/delete/status/payment actions |
+| Audit logging | PARTIAL | Services, categories, orders, payments, staff, settings, telegram, coupons, announcements, FAQ, homepage showcase; logout not yet recorded |
 | Admin users/roles | PASS | Staff CRUD, role/permission display |
 | Settings | PASS | Website + payment method configuration |
 | API-ready | PASS | Clean service layer, external IDs, webhook-ready structure |
@@ -44,5 +44,5 @@ Status of each major feature.
 
 ## Notes
 - Refunds are recorded manually as specified ("Initial implementation may be manual").
-- Coupons are fully implemented (Stage 35): percent/fixed discounts, usage limits, per-customer limits, expiry, admin management.
+- Coupons are fully implemented (Stage 35): percent/fixed discounts, usage limits, per-customer limits, service restriction, expiry, admin management.
 - Real email/Telegram delivery requires production SMTP/Telegram credentials.

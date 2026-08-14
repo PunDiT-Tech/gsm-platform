@@ -16,11 +16,12 @@ class Order extends Model
         'order_number', 'tracking_token', 'customer_id', 'service_id',
         'service_name_snapshot', 'price_snapshot', 'currency_snapshot',
         'status', 'payment_status', 'customer_name', 'customer_email', 'customer_phone',
-        'coupon_code', 'completed_at', 'cancelled_at', 'expires_at',
+        'coupon_code', 'consent_given_at', 'completed_at', 'cancelled_at', 'expires_at',
     ];
 
     protected $casts = [
         'price_snapshot' => 'decimal:2',
+        'consent_given_at' => 'datetime',
         'completed_at' => 'datetime',
         'cancelled_at' => 'datetime',
         'expires_at' => 'datetime',

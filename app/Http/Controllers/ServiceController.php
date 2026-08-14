@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Announcement;
 use App\Models\Service;
 use Illuminate\View\View;
 
@@ -14,6 +15,8 @@ class ServiceController extends Controller
             ->where('slug', $slug)
             ->firstOrFail();
 
-        return view('catalog.show', compact('service'));
+        $announcements = Announcement::active('services')->latest()->get();
+
+        return view('catalog.show', compact('service', 'announcements'));
     }
 }

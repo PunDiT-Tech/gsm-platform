@@ -5,12 +5,26 @@
 @section('panel')
     <h2 class="text-2xl font-bold text-gray-900 mb-6">Welcome, {{ auth()->user()->name }}</h2>
 
+    @if ($announcements->isNotEmpty())
+        <div class="mb-8 space-y-3">
+            @foreach ($announcements as $announcement)
+                <div class="border border-gray-200 rounded-lg p-4 bg-white">
+                    <p class="font-medium text-gray-900 text-sm">{{ $announcement->title }}</p>
+                    <p class="text-sm text-gray-600 mt-1">{{ $announcement->message }}</p>
+                </div>
+            @endforeach
+        </div>
+    @endif
+
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         @foreach ([
             'total' => ['Total Orders', $counts['total']],
             'pending' => ['Pending', $counts['pending']],
             'processing' => ['Processing', $counts['processing']],
+            'waiting' => ['Waiting', $counts['waiting']],
             'completed' => ['Completed', $counts['completed']],
+            'rejected' => ['Rejected', $counts['rejected']],
+            'cancelled' => ['Cancelled', $counts['cancelled']],
         ] as $key => [$label, $value])
             <div class="bg-white border border-gray-200 rounded-lg p-5">
                 <p class="text-sm text-gray-500">{{ $label }}</p>

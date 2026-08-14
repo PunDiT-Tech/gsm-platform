@@ -63,6 +63,7 @@ class CategoryController extends Controller
     public function toggle(ServiceCategory $category): RedirectResponse
     {
         $category->update(['is_active' => ! $category->is_active]);
+        \App\Helpers\AuditLogger::log('category.toggle', $category, ['is_active' => ! $category->is_active], ['is_active' => $category->is_active]);
 
         return back()->with('status', 'Category updated.');
     }
@@ -79,6 +80,16 @@ class CategoryController extends Controller
         ]);
 
         $data['slug'] = $data['slug'] ?: Str::slug($data['name']);
+
+        $existing = ServiceCategory::where('slug', $data['slug'])
+            ->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))
+            ->withTrashed()
+            ->exists();
+
+        if ($existing) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['slug' => 'The generated slug is already in use. Please provide a unique slug.']);
+        }
+
         $data['is_active'] = $request->boolean('is_active');
         $data['sort_order'] = $data['sort_order'] ?? 0;
 

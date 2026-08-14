@@ -79,6 +79,35 @@ class CouponTest extends TestCase
         $this->assertEquals(85.00, (float) $order->price_snapshot);
     }
 
+    public function test_service_restricted_coupon_rejected_for_other_service(): void
+    {
+        $other = Service::create([
+            'category_id' => $this->service->category_id,
+            'name' => 'Other',
+            'slug' => 'other-service',
+            'price' => 50.00,
+            'currency' => 'USD',
+            'service_type' => 'PAID',
+            'is_active' => true,
+        ]);
+        Coupon::create(['code' => 'ONLYDIAG', 'type' => 'PERCENT', 'value' => 10, 'is_active' => true, 'service_id' => $other->id]);
+
+        $this->placeOrder('ONLYDIAG')->assertSessionHasErrors('coupon_code');
+
+        $this->assertDatabaseCount('orders', 0);
+    }
+
+    public function test_service_restricted_coupon_accepted_for_matching_service(): void
+    {
+        Coupon::create(['code' => 'DIY10', 'type' => 'FIXED', 'value' => 10, 'is_active' => true, 'service_id' => $this->service->id]);
+
+        $this->placeOrder('DIY10');
+
+        $order = Order::firstOrFail();
+        $this->assertEquals(90.00, (float) $order->price_snapshot);
+        $this->assertEquals('DIY10', $order->coupon_code);
+    }
+
     protected function trackingTokenOf(\Illuminate\Testing\TestResponse $response): string
     {
         $segments = explode('/', rtrim((string) parse_url($response->headers->get('Location'), PHP_URL_PATH), '/'));

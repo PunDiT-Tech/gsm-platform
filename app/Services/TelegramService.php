@@ -10,34 +10,39 @@ class TelegramService
 {
     public function send(string $message): bool
     {
+        try {
+            $this->sendOrFail($message);
+
+            return true;
+        } catch (\Throwable $e) {
+            Log::warning('Telegram send failed', ['error' => $e->getMessage()]);
+
+            return false;
+        }
+    }
+
+    public function sendOrFail(string $message): void
+    {
         $setting = TelegramSetting::first();
 
         if (! $setting || ! $setting->enabled) {
-            return false;
+            throw new \RuntimeException('Telegram is not enabled.');
         }
 
         $token = $setting->bot_token ? decrypt($setting->bot_token) : null;
 
         if (! $token || ! $setting->chat_id) {
-            return false;
+            throw new \RuntimeException('Telegram is not configured.');
         }
 
-        try {
-            $response = Http::timeout(10)->post("https://api.telegram.org/bot{$token}/sendMessage", [
-                'chat_id' => $setting->chat_id,
-                'text' => $message,
-                'parse_mode' => 'HTML',
-            ]);
+        $response = Http::timeout(10)->post("https://api.telegram.org/bot{$token}/sendMessage", [
+            'chat_id' => $setting->chat_id,
+            'text' => $message,
+            'parse_mode' => 'HTML',
+        ]);
 
-            if ($response->failed()) {
-                Log::warning('Telegram send failed', ['response' => $response->body()]);
-                return false;
-            }
-
-            return true;
-        } catch (\Throwable $e) {
-            Log::warning('Telegram send exception', ['error' => $e->getMessage()]);
-            return false;
+        if ($response->failed()) {
+            throw new \RuntimeException('Telegram API error: ' . $response->body());
         }
     }
 

@@ -40,7 +40,7 @@ return new class extends Migration
         Schema::create('payment_proofs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('payment_id')->constrained()->cascadeOnDelete();
-            $table->string('file_path');
+            $table->string('file_path')->nullable();
             $table->string('original_name')->nullable();
             $table->string('mime_type')->nullable();
             $table->string('transaction_id')->nullable();

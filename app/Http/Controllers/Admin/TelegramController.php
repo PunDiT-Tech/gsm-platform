@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Helpers\AuditLogger;
 use App\Models\TelegramSetting;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -45,6 +46,7 @@ class TelegramController extends Controller
             'chat_id' => $request->chat_id,
             'events' => $request->input('events', []),
         ]);
+        AuditLogger::log('telegram.update', $setting, null, ['enabled' => $setting->enabled, 'chat_id' => $setting->chat_id, 'events' => $setting->events]);
 
         return back()->with('status', 'Telegram settings saved. The bot token is stored encrypted.');
     }

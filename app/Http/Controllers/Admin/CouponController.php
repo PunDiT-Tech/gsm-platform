@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Helpers\AuditLogger;
 use App\Models\Coupon;
+use App\Models\Service;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -12,9 +14,10 @@ class CouponController extends Controller
 {
     public function index(): View
     {
-        $coupons = Coupon::withCount('usages')->latest()->paginate(20);
+        $coupons = Coupon::withCount('usages')->with('service')->latest()->paginate(20);
+        $services = Service::orderBy('sort_order')->withTrashed()->get(['id', 'name', 'is_active']);
 
-        return view('admin.coupons.index', compact('coupons'));
+        return view('admin.coupons.index', compact('coupons', 'services'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -28,6 +31,7 @@ class CouponController extends Controller
         }
 
         Coupon::create($data);
+        AuditLogger::log('coupon.create', $coupon = Coupon::where('code', $data['code'])->first(), null, $data);
 
         return back()->with('status', 'Coupon created.');
     }
@@ -35,6 +39,7 @@ class CouponController extends Controller
     public function update(Request $request, Coupon $coupon): RedirectResponse
     {
         $coupon->update($this->validateData($request));
+        AuditLogger::log('coupon.update', $coupon, null, $coupon->toArray());
 
         return back()->with('status', 'Coupon updated.');
     }
@@ -42,6 +47,7 @@ class CouponController extends Controller
     public function destroy(Coupon $coupon): RedirectResponse
     {
         $coupon->delete();
+        AuditLogger::log('coupon.delete', $coupon, $coupon->toArray());
 
         return back()->with('status', 'Coupon deleted.');
     }
@@ -54,6 +60,7 @@ class CouponController extends Controller
             'value' => ['required', 'numeric', 'min:0.01', 'max:1000000'],
             'usage_limit' => ['nullable', 'integer', 'min:1'],
             'per_customer_limit' => ['nullable', 'integer', 'min:1'],
+            'service_id' => ['nullable', 'exists:services,id'],
             'expires_at' => ['nullable', 'date'],
             'is_active' => ['boolean'],
         ]);

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Announcement;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -17,9 +18,14 @@ class DashboardController extends Controller
             'total' => $customer?->orders()->count() ?? 0,
             'pending' => $customer?->orders()->where('status', 'PENDING')->count() ?? 0,
             'processing' => $customer?->orders()->where('status', 'PROCESSING')->count() ?? 0,
+            'waiting' => $customer?->orders()->where('status', 'WAITING_FOR_CUSTOMER')->count() ?? 0,
             'completed' => $customer?->orders()->where('status', 'COMPLETED')->count() ?? 0,
+            'rejected' => $customer?->orders()->where('status', 'REJECTED')->count() ?? 0,
+            'cancelled' => $customer?->orders()->where('status', 'CANCELLED')->count() ?? 0,
         ];
 
-        return view('dashboard', compact('orders', 'counts'));
+        $announcements = Announcement::active('dashboard')->latest()->limit(3)->get();
+
+        return view('dashboard', compact('orders', 'counts', 'announcements'));
     }
 }

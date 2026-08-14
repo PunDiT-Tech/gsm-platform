@@ -65,6 +65,7 @@ class ServiceController extends Controller
     public function toggle(Service $service): RedirectResponse
     {
         $service->update(['is_active' => ! $service->is_active]);
+        \App\Helpers\AuditLogger::log('service.toggle', $service, ['is_active' => ! $service->is_active], ['is_active' => $service->is_active]);
 
         return back()->with('status', 'Service updated.');
     }
@@ -72,6 +73,7 @@ class ServiceController extends Controller
     public function feature(Service $service): RedirectResponse
     {
         $service->update(['is_featured' => ! $service->is_featured]);
+        \App\Helpers\AuditLogger::log('service.feature', $service, ['is_featured' => ! $service->is_featured], ['is_featured' => $service->is_featured]);
 
         return back()->with('status', 'Service updated.');
     }
@@ -100,6 +102,16 @@ class ServiceController extends Controller
         ]);
 
         $data['slug'] = $data['slug'] ?: Str::slug($data['name']);
+
+        $existing = Service::where('slug', $data['slug'])
+            ->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))
+            ->withTrashed()
+            ->exists();
+
+        if ($existing) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['slug' => 'The generated slug is already in use. Please provide a unique slug.']);
+        }
+
         $data['payment_required'] = $request->boolean('payment_required');
         $data['is_active'] = $request->boolean('is_active');
         $data['is_featured'] = $request->boolean('is_featured');

@@ -6,11 +6,12 @@ use App\Models\Coupon;
 use App\Models\CouponUsage;
 use App\Models\Customer;
 use App\Models\Order;
+use App\Models\Service;
 use Illuminate\Validation\ValidationException;
 
 class CouponService
 {
-    public function resolve(?string $code, ?Customer $customer): ?Coupon
+    public function resolve(?string $code, ?Customer $customer, ?Service $service = null): ?Coupon
     {
         if (! $code) {
             return null;
@@ -20,6 +21,10 @@ class CouponService
 
         if (! $coupon) {
             throw ValidationException::withMessages(['coupon_code' => 'This coupon code is invalid or expired.']);
+        }
+
+        if ($service && $coupon->service_id && $coupon->service_id !== $service->id) {
+            throw ValidationException::withMessages(['coupon_code' => 'This coupon cannot be applied to this service.']);
         }
 
         if ($coupon->isExhausted()) {

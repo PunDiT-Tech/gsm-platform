@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Helpers\AuditLogger;
 use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
 
 class StaffController extends Controller
@@ -26,7 +28,7 @@ class StaffController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'unique:users,email'],
-            'password' => ['required', 'min:8', 'confirmed'],
+            'password' => ['required', 'confirmed', Password::min(8)->letters()->numbers()->mixedCase()],
             'roles' => ['required', 'array'],
             'roles.*' => ['exists:roles,id'],
         ]);
@@ -40,6 +42,7 @@ class StaffController extends Controller
         ]);
 
         $user->roles()->attach($data['roles']);
+        AuditLogger::log('staff.create', $user, null, ['name' => $user->name, 'email' => $user->email, 'roles' => array_values($data['roles'])]);
 
         return back()->with('status', 'Staff member created.');
     }
@@ -54,6 +57,8 @@ class StaffController extends Controller
             'roles.*' => ['exists:roles,id'],
         ]);
 
+        $before = ['name' => $user->name, 'email' => $user->email, 'is_active' => $user->is_active];
+
         $user->update([
             'name' => $data['name'],
             'email' => $data['email'],
@@ -63,6 +68,8 @@ class StaffController extends Controller
         if (isset($data['roles'])) {
             $user->roles()->sync($data['roles']);
         }
+
+        AuditLogger::log('staff.update', $user, $before, ['name' => $user->name, 'email' => $user->email, 'is_active' => $user->is_active]);
 
         return back()->with('status', 'Staff member updated.');
     }
@@ -75,6 +82,7 @@ class StaffController extends Controller
 
         $user->roles()->detach();
         $user->update(['is_active' => false]);
+        AuditLogger::log('staff.deactivate', $user, ['is_active' => true], ['is_active' => false]);
 
         return back()->with('status', 'Staff member deactivated.');
     }

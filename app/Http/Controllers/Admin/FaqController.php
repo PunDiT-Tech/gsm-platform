@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Helpers\AuditLogger;
 use App\Models\Faq;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -20,7 +21,8 @@ class FaqController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $this->validateData($request);
-        Faq::create($data);
+        $faq = Faq::create($data);
+        AuditLogger::log('faq.create', $faq, null, $data);
 
         return back()->with('status', 'FAQ added.');
     }
@@ -28,6 +30,7 @@ class FaqController extends Controller
     public function update(Request $request, Faq $faq): RedirectResponse
     {
         $faq->update($this->validateData($request));
+        AuditLogger::log('faq.update', $faq, null, $faq->toArray());
 
         return back()->with('status', 'FAQ updated.');
     }
@@ -35,6 +38,7 @@ class FaqController extends Controller
     public function destroy(Faq $faq): RedirectResponse
     {
         $faq->delete();
+        AuditLogger::log('faq.delete', $faq, $faq->toArray());
 
         return back()->with('status', 'FAQ deleted.');
     }

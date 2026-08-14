@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Helpers\AuditLogger;
 use App\Models\Announcement;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -24,7 +25,8 @@ class AnnouncementController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        Announcement::create($this->validateData($request));
+        $announcement = Announcement::create($this->validateData($request));
+        AuditLogger::log('announcement.create', $announcement, null, $announcement->toArray());
 
         return redirect()->route('admin.announcements.index')->with('status', 'Announcement created.');
     }
@@ -37,6 +39,7 @@ class AnnouncementController extends Controller
     public function update(Request $request, Announcement $announcement): RedirectResponse
     {
         $announcement->update($this->validateData($request));
+        AuditLogger::log('announcement.update', $announcement, null, $announcement->toArray());
 
         return redirect()->route('admin.announcements.index')->with('status', 'Announcement updated.');
     }
@@ -44,6 +47,7 @@ class AnnouncementController extends Controller
     public function destroy(Announcement $announcement): RedirectResponse
     {
         $announcement->delete();
+        AuditLogger::log('announcement.delete', $announcement, $announcement->toArray());
 
         return redirect()->route('admin.announcements.index')->with('status', 'Announcement deleted.');
     }

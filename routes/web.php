@@ -64,7 +64,7 @@ Route::middleware('auth')->group(function () {
     Route::get('dashboard/orders', [MyOrdersController::class, 'index'])->name('orders.index');
     Route::get('dashboard/orders/{order}', [MyOrdersController::class, 'show'])->name('orders.show');
     Route::post('dashboard/orders/{order}/message', [MyOrdersController::class, 'message'])->name('orders.message');
-    Route::post('dashboard/orders/{order}/upload', [MyOrdersController::class, 'upload'])->name('orders.upload');
+    Route::post('dashboard/orders/{order}/upload', [MyOrdersController::class, 'upload'])->middleware('throttle:uploads')->name('orders.upload');
     Route::get('dashboard/orders/{order}/pay', [PaymentController::class, 'show'])->name('orders.pay');
     Route::get('dashboard/orders/result/{result}/download', [MyOrdersController::class, 'downloadResult'])->name('orders.result-download');
     Route::get('dashboard/orders/message/{message}/download', [MyOrdersController::class, 'downloadMessage'])->name('orders.message-download');

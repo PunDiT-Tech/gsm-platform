@@ -99,6 +99,20 @@ class PaymentFlowTest extends TestCase
         $this->assertDatabaseCount('payment_proofs', 0);
     }
 
+    public function test_transaction_id_only_proof_is_accepted(): void
+    {
+        [$user, $order] = $this->registeredOrder();
+        $payment = $order->payments()->first();
+
+        $this->actingAs($user)->post(route('orders.payment.upload', $order), [
+            'payment_id' => $payment->id,
+            'transaction_id' => 'ONLY-TX',
+        ])->assertSessionHas('status');
+
+        $this->assertDatabaseHas('payment_proofs', ['transaction_id' => 'ONLY-TX', 'file_path' => null]);
+        $this->assertDatabaseHas('payments', ['id' => $payment->id, 'status' => 'PROOF_SUBMITTED']);
+    }
+
     public function test_admin_verifies_payment_and_order_updates(): void
     {
         $admin = User::factory()->create(['email_verified_at' => now()]);

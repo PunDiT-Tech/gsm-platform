@@ -44,7 +44,7 @@ class SendTelegramOrderNotification implements ShouldQueue
             . "Status: {$this->order->status} / {$this->order->payment_status}" . PHP_EOL
             . "Amount: {$this->order->currency_snapshot} " . number_format((float) $this->order->price_snapshot, 2);
 
-        $telegram->send($message);
+        $telegram->sendOrFail($message);
     }
 
     public function failed(\Throwable $e): void

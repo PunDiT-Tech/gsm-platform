@@ -63,8 +63,9 @@ class OrderController extends Controller
             return back()->with('status', 'Order already has this status.');
         }
 
-        DB::transaction(function () use ($request, $order) {
-            $from = $order->status;
+        $from = $order->status;
+
+        DB::transaction(function () use ($request, $order, $from) {
             $order->update([
                 'status' => $request->status,
                 'completed_at' => $request->status === 'COMPLETED' ? now() : $order->completed_at,

@@ -38,7 +38,7 @@ class OrderService
 
         $customer = $this->resolveCustomer($data, $user);
 
-        $coupon = app(CouponService::class)->resolve($data['coupon_code'] ?? null, $customer);
+        $coupon = app(CouponService::class)->resolve($data['coupon_code'] ?? null, $customer, $service);
 
         $basePrice = $service->service_type === 'FREE' ? 0 : (float) $service->price;
         $price = app(CouponService::class)->applyDiscount($basePrice, $coupon);
@@ -61,6 +61,7 @@ class OrderService
                 'customer_email' => $customer->email,
                 'customer_phone' => $customer->phone,
                 'coupon_code' => $coupon?->code ?? null,
+                'consent_given_at' => ($service->consent_required && ! empty($data['consent'])) ? now() : null,
                 'expires_at' => $paymentRequired ? now()->addHours((int) config('app.order_expiry_hours', 24)) : null,
             ]);
 
@@ -153,8 +154,11 @@ class OrderService
                 case 'IMEI':
                     $rules[] = $field->validation_regex ? "regex:{$field->validation_regex}" : 'regex:/^[0-9]{15}$/';
                     break;
+                case 'PHONE':
+                    $rules[] = $field->validation_regex ? "regex:{$field->validation_regex}" : 'regex:/^[0-9+\-() ]{7,20}$/';
+                    break;
                 case 'SERIAL_NUMBER':
-                    $rules[] = 'string';
+                    $rules[] = $field->validation_regex ? "regex:{$field->validation_regex}" : 'regex:/^[A-Za-z0-9_-]{4,64}$/';
                     break;
                 default:
                     $rules[] = 'string';
