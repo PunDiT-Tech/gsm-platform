@@ -28,7 +28,10 @@
         </div>
 
         <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="{{ route('order.lookup') }}" class="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 text-sm font-medium">Track your order</a>
+            @if ($order->payment_status === 'UNPAID' || $order->payment_status === 'PROOF_SUBMITTED')
+                <a href="{{ route('orders.payment', [$order->order_number, $token]) }}" class="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 text-sm font-medium">Make payment</a>
+            @endif
+            <a href="{{ route('order.lookup') }}" class="border border-gray-300 text-gray-700 px-6 py-3 rounded-md hover:border-blue-400 text-sm font-medium">Track your order</a>
             <a href="{{ route('services.index') }}" class="border border-gray-300 text-gray-700 px-6 py-3 rounded-md hover:border-blue-400 text-sm font-medium">Browse more services</a>
         </div>
     </div>

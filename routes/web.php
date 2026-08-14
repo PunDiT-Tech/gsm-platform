@@ -11,6 +11,7 @@ use App\Http\Controllers\CheckOrderController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ServiceController;
 use Illuminate\Support\Facades\Route;
@@ -27,6 +28,11 @@ Route::get('/check-order', [CheckOrderController::class, 'create'])->name('order
 Route::post('/check-order', [CheckOrderController::class, 'lookup'])->middleware('throttle:order-lookup')->name('order.lookup.submit');
 Route::post('/orders', [OrderController::class, 'store'])->middleware('throttle:orders')->name('orders.store');
 Route::get('/orders/{order}/{token}', [OrderController::class, 'confirmation'])->name('orders.confirmation');
+Route::get('/orders/{order}/{token}/pay', [PaymentController::class, 'show'])->name('orders.payment');
+Route::post('/orders/{order}/payment', [PaymentController::class, 'upload'])->middleware('throttle:uploads')->name('orders.payment.upload');
+
+require __DIR__ . '/admin.php';
+
 Route::get('/{slug}', [HomeController::class, 'page'])->whereIn('slug', ['terms', 'privacy', 'refunds', 'acceptable-use'])->name('page');
 
 Route::middleware('guest')->group(function () {

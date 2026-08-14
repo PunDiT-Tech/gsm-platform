@@ -9,6 +9,8 @@ class OrderStatusHistory extends Model
 {
     public $timestamps = false;
 
+    protected $table = 'order_status_history';
+
     protected $fillable = ['order_id', 'from_status', 'to_status', 'user_id', 'note', 'created_at'];
 
     protected $casts = ['created_at' => 'datetime'];

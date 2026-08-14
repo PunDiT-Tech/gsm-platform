@@ -41,6 +41,7 @@ return new class extends Migration
             $table->string('label');
             $table->text('value');
             $table->string('file_path')->nullable();
+            $table->timestamps();
 
             $table->index('order_id');
         });
