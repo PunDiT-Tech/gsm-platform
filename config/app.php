@@ -84,6 +84,8 @@ return [
 
     'faker_locale' => env('APP_FAKER_LOCALE', 'en_US'),
 
+    'order_expiry_hours' => env('ORDER_EXPIRY_HOURS', 24),
+
     /*
     |--------------------------------------------------------------------------
     | Encryption Key
