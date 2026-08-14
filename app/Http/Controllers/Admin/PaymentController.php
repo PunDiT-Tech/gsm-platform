@@ -41,6 +41,9 @@ class PaymentController extends Controller
             }
         });
 
+        $this->notify($payment->order, 'Payment verified', 'Your payment has been verified. We will begin processing your order.');
+        \App\Jobs\SendTelegramOrderNotification::dispatch($payment->order, 'payment_verified');
+
         return back()->with('status', 'Payment verified.');
     }
 
@@ -56,7 +59,17 @@ class PaymentController extends Controller
             $payment->order()->update(['payment_status' => 'REJECTED']);
         });
 
+        $this->notify($payment->order, 'Payment rejected', 'Your payment proof was rejected. Please check your order and resubmit a valid proof.');
+        \App\Jobs\SendTelegramOrderNotification::dispatch($payment->order, 'payment_rejected');
+
         return back()->with('status', 'Payment rejected.');
+    }
+
+    protected function notify(\App\Models\Order $order, string $title, string $message): void
+    {
+        if ($order->customer?->user_id) {
+            \App\Models\User::find($order->customer->user_id)?->notify(new \App\Notifications\OrderStatusNotification($order, $title, $message));
+        }
     }
 
     public function downloadProof(PaymentProof $proof)

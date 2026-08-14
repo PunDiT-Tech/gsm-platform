@@ -80,7 +80,28 @@ class OrderController extends Controller
             ]);
         });
 
+        $this->notifyCustomer($order, 'Order ' . str_replace('_', ' ', $request->status), 'Your order status changed to ' . str_replace('_', ' ', $request->status) . '.');
+
+        $event = match ($request->status) {
+            'PROCESSING' => 'processing',
+            'WAITING_FOR_CUSTOMER' => 'waiting_for_customer',
+            'COMPLETED' => 'completed',
+            'CANCELLED', 'REJECTED' => 'cancelled',
+            default => null,
+        };
+
+        if ($event) {
+            \App\Jobs\SendTelegramOrderNotification::dispatch($order, $event);
+        }
+
         return back()->with('status', 'Order status updated.');
+    }
+
+    protected function notifyCustomer(Order $order, string $title, string $message): void
+    {
+        if ($order->customer?->user_id) {
+            \App\Models\User::find($order->customer->user_id)?->notify(new \App\Notifications\OrderStatusNotification($order, $title, $message));
+        }
     }
 
     public function message(Request $request, Order $order): RedirectResponse

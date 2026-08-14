@@ -102,6 +102,12 @@ class OrderService
 
         $order->tracking_code_plain = $trackingToken;
 
+        if ($customer->user_id) {
+            \App\Models\User::find($customer->user_id)?->notify(new \App\Notifications\OrderConfirmationNotification($order));
+        }
+
+        \App\Jobs\SendTelegramOrderNotification::dispatch($order, 'new_order');
+
         return $order;
     }
 

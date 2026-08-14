@@ -10,6 +10,8 @@ use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\CheckOrderController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\MyOrdersController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
@@ -52,6 +54,18 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    Route::get('dashboard/orders', [MyOrdersController::class, 'index'])->name('orders.index');
+    Route::get('dashboard/orders/{order}', [MyOrdersController::class, 'show'])->name('orders.show');
+    Route::post('dashboard/orders/{order}/message', [MyOrdersController::class, 'message'])->name('orders.message');
+    Route::post('dashboard/orders/{order}/upload', [MyOrdersController::class, 'upload'])->name('orders.upload');
+    Route::get('dashboard/orders/{order}/pay', [PaymentController::class, 'show'])->name('orders.pay');
+    Route::get('dashboard/orders/result/{result}/download', [MyOrdersController::class, 'downloadResult'])->name('orders.result-download');
+    Route::get('dashboard/orders/message/{message}/download', [MyOrdersController::class, 'downloadMessage'])->name('orders.message-download');
+
+    Route::get('dashboard/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('dashboard/notifications/{id}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
+    Route::post('dashboard/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.readAll');
 
     Route::get('verify-email', EmailVerificationPromptController::class)->name('verification.notice');
     Route::get('verify-email/{id}/{hash}', VerifyEmailController::class)->middleware(['signed', 'throttle:6,1'])->name('verification.verify');

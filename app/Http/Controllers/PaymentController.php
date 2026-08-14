@@ -13,16 +13,16 @@ use Illuminate\Support\Facades\Storage;
 
 class PaymentController extends Controller
 {
-    public function show(string $orderNumber, string $token)
+    public function show(Order $order, ?string $token = null)
     {
-        $order = Order::where('order_number', $orderNumber)
-            ->with(['payments.method'])
-            ->firstOrFail();
+        $isOwner = auth()->check() && auth()->user()->id === $order->customer?->user_id;
+        $validToken = $token && Hash::check($token, $order->tracking_token);
 
-        if (! Hash::check($token, $order->tracking_token)) {
+        if (! $isOwner && ! $validToken) {
             abort(404);
         }
 
+        $order->load(['payments.method']);
         $methods = PaymentMethod::where('is_active', true)->orderBy('sort_order')->get();
 
         return view('orders.payment', compact('order', 'token', 'methods'));
@@ -30,7 +30,10 @@ class PaymentController extends Controller
 
     public function upload(Request $request, Order $order): RedirectResponse
     {
-        if (! Hash::check($request->token, $order->tracking_token)) {
+        $isOwner = auth()->check() && auth()->user()->id === $order->customer?->user_id;
+        $validToken = $request->token && Hash::check($request->token, $order->tracking_token);
+
+        if (! $isOwner && ! $validToken) {
             abort(403);
         }
 
@@ -63,6 +66,8 @@ class PaymentController extends Controller
         if (in_array($order->payment_status, ['UNPAID', 'REJECTED'])) {
             $order->update(['payment_status' => 'PROOF_SUBMITTED']);
         }
+
+        \App\Jobs\SendTelegramOrderNotification::dispatch($order, 'payment_proof');
 
         return back()->with('status', 'Payment proof submitted. We will review it shortly.');
     }
