@@ -43,6 +43,7 @@ php artisan test
 - Clean layering: Controllers → Services → Repositories → Models
 - Order data integrity via snapshots (`service_name_snapshot`, `price_snapshot`, `currency_snapshot`)
 - Server-side authorization via RBAC roles + permission middleware + audit logging
+- Two-factor authentication (TOTP) challenge for all staff with recovery codes
 - Private file storage for proofs/results; downloads authorized
 - Queued notifications (email + Telegram); failures never roll back DB transactions
 
@@ -67,4 +68,5 @@ php artisan test
 
 - This platform is intended for legitimate GSM repair, diagnostics and authorized maintenance only.
 - Do not commit `.env`, real credentials, or payment secrets.
+- Require two-factor authentication for every staff account before granting production access (see `/profile/two-factor`).
 - Enable HTTPS, queue workers (Supervisor), and the scheduler (Cron) in production.
