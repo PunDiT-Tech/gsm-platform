@@ -52,6 +52,21 @@
     </div>
 </div>
 
+<div>
+    <label for="image" class="block text-sm font-medium text-gray-700">Cover image <span class="text-gray-400">(JPG/PNG/WebP, max 5MB)</span></label>
+    <input id="image" type="file" name="image" accept=".jpg,.jpeg,.png,.webp"
+        class="mt-1 block w-full text-sm text-gray-500 file:mr-3 file:rounded-md file:border-0 file:bg-blue-50 file:px-3 file:py-2 file:text-blue-700">
+    @if ($service?->image)
+        <div class="flex items-center gap-3 mt-2">
+            <img src="{{ \Illuminate\Support\Facades\Storage::disk('local')->url($service->image) }}" alt="{{ $service->name }}" class="w-16 h-16 object-cover rounded-md border border-gray-200">
+            <label class="flex items-center text-xs text-gray-600">
+                <input type="checkbox" name="remove_image" value="1" class="rounded border-gray-300 text-blue-600">
+                <span class="ml-1.5">Remove current image</span>
+            </label>
+        </div>
+    @endif
+</div>
+
 <div class="grid grid-cols-2 gap-4">
     <div>
         <label for="service_type" class="block text-sm font-medium text-gray-700">Service type</label>

@@ -241,4 +241,53 @@ class OrderFlowTest extends TestCase
         $order = Order::first();
         $this->assertDatabaseHas('order_status_history', ['order_id' => $order->id, 'to_status' => 'PENDING']);
     }
+
+    public function test_order_review_step_shows_summary_and_confirms(): void
+    {
+        $this->post(route('orders.review'), [
+            'service_slug' => 'diagnostic',
+            'customer_lookup' => 'guest',
+            'customer_name' => 'Reviewer',
+            'customer_email' => 'reviewer@example.com',
+            'customer_phone' => '123456789',
+            'fields' => [1 => '123456789012345'],
+            'consent' => '1',
+        ])->assertRedirect(route('orders.review-page'));
+
+        $this->get(route('orders.review-page'))
+            ->assertOk()
+            ->assertSee('Review your order')
+            ->assertSee('123456789012345')
+            ->assertSee('50.00');
+
+        $this->assertDatabaseCount('orders', 0);
+
+        $this->post(route('orders.store'), [
+            'service_slug' => 'diagnostic',
+        ])->assertRedirect();
+
+        $this->assertDatabaseCount('orders', 1);
+        $this->assertDatabaseHas('orders', ['customer_email' => 'reviewer@example.com', 'price_snapshot' => 50.00]);
+        $this->assertDatabaseHas('order_field_values', ['value' => '123456789012345']);
+    }
+
+    public function test_order_review_page_is_not_accessible_without_submission(): void
+    {
+        $this->get(route('orders.review-page'))->assertNotFound();
+    }
+
+    public function test_review_rejects_invalid_field_before_creating_order(): void
+    {
+        $this->post(route('orders.review'), [
+            'service_slug' => 'diagnostic',
+            'customer_lookup' => 'guest',
+            'customer_name' => 'Guest',
+            'customer_email' => 'guest@example.com',
+            'customer_phone' => '123456789',
+            'fields' => [1 => 'bad-imei'],
+            'consent' => '1',
+        ])->assertSessionHasErrors();
+
+        $this->assertDatabaseCount('orders', 0);
+    }
 }

@@ -7,8 +7,16 @@
         <div>
             <a href="{{ route('admin.customers.index') }}" class="text-sm text-blue-600 hover:underline">← Back to customers</a>
             <h1 class="text-2xl font-bold text-gray-900 mt-1">{{ $customer->name }}</h1>
-            <p class="text-gray-500 text-sm">{{ $customer->email }} · {{ $customer->phone }}</p>
+            <p class="text-gray-500 text-sm">{{ $customer->email }} · {{ $customer->phone }} · {{ $customer->user?->is_active ? 'Active' : 'Suspended' }}</p>
         </div>
+        @if ($customer->user_id)
+            <form method="POST" action="{{ route('admin.customers.suspend', $customer) }}" onsubmit="return confirm('Toggle account status for {{ $customer->name }}?')">
+                @csrf
+                <button class="px-4 py-2 rounded-md text-sm {{ $customer->user->is_active ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-green-600 hover:bg-green-700 text-white' }}">
+                    {{ $customer->user->is_active ? 'Suspend account' : 'Re-enable account' }}
+                </button>
+            </form>
+        @endif
     </div>
 
     <h2 class="text-lg font-semibold text-gray-900 mb-3">Orders</h2>

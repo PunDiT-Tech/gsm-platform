@@ -23,24 +23,29 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 @foreach ($services as $service)
                     <a href="{{ route('services.show', $service->slug) }}"
-                       class="bg-white border border-gray-200 rounded-lg p-6 hover:border-blue-400 hover:shadow-sm transition flex flex-col">
-                        <div class="flex items-center justify-between mb-3">
-                            <span class="text-3xl">{{ $service->icon ?? '🔧' }}</span>
-                            <span class="px-2 py-0.5 rounded-full text-xs {{ $service->is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">{{ $service->is_active ? 'Online' : 'Offline' }}</span>
-                        </div>
-                        <h2 class="font-semibold text-gray-900 text-lg">{{ $service->name }}</h2>
-                        <p class="text-sm text-gray-500 mt-1 flex-1">{{ $service->short_description }}</p>
-                        <div class="mt-4 flex items-center justify-between">
-                            <span class="font-bold text-gray-900">
-                                @if ($service->service_type === 'FREE')
-                                    Free
-                                @elseif ($service->service_type === 'EXTERNAL')
-                                    External
-                                @else
-                                    {{ $service->currency }} {{ number_format((float) $service->price, 2) }}
-                                @endif
-                            </span>
-                            <span class="text-blue-600 text-sm font-medium">Order →</span>
+                       class="bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-blue-400 hover:shadow-sm transition flex flex-col">
+                        @if ($service->image)
+                            <img src="{{ route('services.image', $service) }}" alt="{{ $service->name }}" class="w-full h-44 object-cover">
+                        @endif
+                        <div class="p-6 flex flex-col flex-1">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-3xl">{{ $service->icon ?? '🔧' }}</span>
+                                <span class="px-2 py-0.5 rounded-full text-xs {{ $service->is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">{{ $service->is_active ? 'Online' : 'Offline' }}</span>
+                            </div>
+                            <h2 class="font-semibold text-gray-900 text-lg">{{ $service->name }}</h2>
+                            <p class="text-sm text-gray-500 mt-1 flex-1">{{ $service->short_description }}</p>
+                            <div class="mt-4 flex items-center justify-between">
+                                <span class="font-bold text-gray-900">
+                                    @if ($service->service_type === 'FREE')
+                                        Free
+                                    @elseif ($service->service_type === 'EXTERNAL')
+                                        External
+                                    @else
+                                        {{ $service->currency }} {{ number_format((float) $service->price, 2) }}
+                                    @endif
+                                </span>
+                                <span class="text-blue-600 text-sm font-medium">Order →</span>
+                            </div>
                         </div>
                     </a>
                 @endforeach

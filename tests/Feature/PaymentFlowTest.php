@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\Payment;
 use App\Models\PaymentMethod;
 use App\Models\PaymentProof;
+use App\Models\Refund;
 use App\Models\Role;
 use App\Models\Service;
 use App\Models\ServiceCategory;
@@ -142,5 +143,100 @@ class PaymentFlowTest extends TestCase
         $payment = Payment::create(['order_id' => $order->id, 'amount' => 50, 'currency' => 'USD', 'status' => 'PROOF_SUBMITTED']);
 
         $this->post(route('admin.payments.verify', $payment))->assertRedirect(route('login'));
+    }
+
+    public function test_owner_can_select_payment_method(): void
+    {
+        [$user, $order] = $this->registeredOrder();
+        $payment = $order->payments()->first();
+        $method = PaymentMethod::where('code', 'BANK_TRANSFER')->firstOrFail();
+
+        $this->actingAs($user)->post(route('orders.payment-method', $order), [
+            'method_id' => $method->id,
+        ])->assertRedirect(route('orders.pay', $order));
+
+        $this->assertDatabaseHas('payments', ['id' => $payment->id, 'payment_method_id' => $method->id]);
+    }
+
+    public function test_stranger_cannot_select_payment_method(): void
+    {
+        $other = User::factory()->create(['email' => 'other@example.com', 'email_verified_at' => now()]);
+        Customer::create(['user_id' => $other->id, 'name' => $other->name, 'email' => $other->email, 'phone' => $other->phone]);
+
+        [, $order] = $this->registeredOrder();
+        $method = PaymentMethod::where('code', 'BANK_TRANSFER')->firstOrFail();
+
+        $this->actingAs($other)->post(route('orders.payment-method', $order), [
+            'method_id' => $method->id,
+        ])->assertForbidden();
+    }
+
+    public function test_admin_records_refund_on_verified_payment(): void
+    {
+        $admin = User::factory()->create(['email_verified_at' => now()]);
+        $admin->roles()->attach(Role::where('name', 'SUPER_ADMIN')->firstOrFail());
+
+        [, $order] = $this->registeredOrder();
+        $payment = $order->payments()->first();
+        $payment->update(['status' => 'VERIFIED']);
+
+        $this->actingAs($admin)->post(route('admin.payments.refund', $payment), [
+            'amount' => 50.00,
+            'reason' => 'Customer requested cancellation',
+            'method' => 'Bank Transfer',
+        ])->assertSessionHas('status');
+
+        $this->assertDatabaseHas('refunds', ['order_id' => $order->id, 'payment_id' => $payment->id, 'amount' => 50.00]);
+        $this->assertDatabaseHas('payments', ['id' => $payment->id, 'status' => 'REFUNDED']);
+        $this->assertDatabaseHas('orders', ['id' => $order->id, 'payment_status' => 'REFUNDED']);
+        $this->assertDatabaseHas('audit_logs', ['action' => 'payment.refund']);
+    }
+
+    public function test_refund_rejects_non_verified_payment(): void
+    {
+        $admin = User::factory()->create(['email_verified_at' => now()]);
+        $admin->roles()->attach(Role::where('name', 'SUPER_ADMIN')->firstOrFail());
+
+        [, $order] = $this->registeredOrder();
+        $payment = $order->payments()->first();
+
+        $this->actingAs($admin)->post(route('admin.payments.refund', $payment), [
+            'amount' => 50.00,
+        ])->assertStatus(400);
+
+        $this->assertDatabaseCount('refunds', 0);
+    }
+
+    public function test_refund_amount_cannot_exceed_payment(): void
+    {
+        $admin = User::factory()->create(['email_verified_at' => now()]);
+        $admin->roles()->attach(Role::where('name', 'SUPER_ADMIN')->firstOrFail());
+
+        [, $order] = $this->registeredOrder();
+        $payment = $order->payments()->first();
+        $payment->update(['status' => 'VERIFIED']);
+
+        $this->actingAs($admin)->post(route('admin.payments.refund', $payment), [
+            'amount' => 999.99,
+        ])->assertSessionHasErrors('amount');
+
+        $this->assertDatabaseCount('refunds', 0);
+    }
+
+    public function test_finance_role_can_refund(): void
+    {
+        $finance = User::factory()->create(['email_verified_at' => now()]);
+        $finance->roles()->attach(Role::where('name', 'FINANCE')->firstOrFail());
+
+        [, $order] = $this->registeredOrder();
+        $payment = $order->payments()->first();
+        $payment->update(['status' => 'VERIFIED']);
+
+        $this->actingAs($finance)->post(route('admin.payments.refund', $payment), [
+            'amount' => 25.00,
+            'reason' => 'Partial refund',
+        ])->assertSessionHas('status');
+
+        $this->assertDatabaseHas('refunds', ['amount' => 25.00]);
     }
 }

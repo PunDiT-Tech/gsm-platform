@@ -62,4 +62,63 @@ class HomePageTest extends TestCase
     {
         $this->get(route('faq'))->assertOk();
     }
+
+    public function test_homepage_sections_render(): void
+    {
+        \App\Models\HomepageSection::create(['key' => 'hero', 'title' => 'Custom Hero', 'content' => 'Custom subtitle', 'is_active' => true]);
+        \App\Models\HomepageSection::create(['key' => 'stats', 'content' => json_encode([['value' => '100', 'label' => 'Devices fixed']]), 'is_active' => true]);
+        \App\Models\HomepageSection::create(['key' => 'how_it_works', 'title' => 'How it works', 'content' => json_encode([['title' => 'Step A', 'text' => 'Do thing']]), 'is_active' => true]);
+        \App\Models\HomepageSection::create(['key' => 'cta', 'title' => 'Custom CTA', 'content' => 'Custom cta subtitle', 'is_active' => true]);
+        \App\Models\HomepageSection::create(['key' => 'footer', 'title' => 'MyShop', 'is_active' => true]);
+
+        $response = $this->get(route('home'));
+        $response->assertOk();
+        $response->assertSee('Custom Hero');
+        $response->assertSee('Custom subtitle');
+        $response->assertSee('100');
+        $response->assertSee('Devices fixed');
+        $response->assertSee('Step A');
+        $response->assertSee('Custom CTA');
+    }
+
+    public function test_service_page_shows_faq(): void
+    {
+        $category = ServiceCategory::create(['name' => 'Repair', 'slug' => 'repair', 'is_active' => true, 'sort_order' => 1]);
+        Service::create([
+            'category_id' => $category->id,
+            'name' => 'Screen Repair',
+            'slug' => 'screen-repair',
+            'price' => 25,
+            'currency' => 'USD',
+            'service_type' => 'PAID',
+            'is_active' => true,
+        ]);
+        \App\Models\Faq::create(['question' => 'How long?', 'answer' => 'A day', 'sort_order' => 1, 'is_active' => true]);
+
+        $this->get(route('services.show', 'screen-repair'))->assertOk()->assertSee('How long?');
+    }
+
+    public function test_admin_can_update_homepage_content(): void
+    {
+        $this->seed(\Database\Seeders\RolePermissionSeeder::class);
+        $role = \App\Models\Role::where('name', 'SUPER_ADMIN')->first();
+        $admin = \App\Models\User::factory()->create(['email_verified_at' => now()]);
+        $admin->roles()->attach($role);
+
+        $this->actingAs($admin)->post(route('admin.homepage.content'), [
+            'hero_title' => 'Admin Hero',
+            'hero_subtitle' => 'Admin subtitle',
+            'stats_value' => ['500'],
+            'stats_label' => ['Jobs done'],
+            'step_title' => ['Step 1'],
+            'step_text' => ['Do it'],
+            'cta_title' => 'Ready?',
+            'cta_subtitle' => 'Go now',
+            'footer_copyright' => 'ShopCo',
+        ])->assertSessionHas('status');
+
+        $this->assertDatabaseHas('homepage_sections', ['key' => 'hero', 'title' => 'Admin Hero', 'content' => 'Admin subtitle']);
+        $this->assertDatabaseHas('homepage_sections', ['key' => 'cta', 'content' => 'Go now']);
+        $this->assertDatabaseHas('homepage_sections', ['key' => 'footer', 'title' => 'ShopCo']);
+    }
 }

@@ -35,6 +35,8 @@ class MyOrdersController extends Controller
             'couponUsage',
         ]);
 
+        $order->messages->whereNull('read_at')->each->update(['read_at' => now()]);
+
         return view('orders.show', compact('order'));
     }
 

@@ -13,7 +13,81 @@
                 <span class="font-bold text-lg text-gray-900">{{ $order->currency_snapshot }} {{ number_format((float) $order->price_snapshot, 2) }}</span>
             </div>
 
+            @php
+                $unpaid = $order->payments->firstWhere('status', 'UNPAID');
+            @endphp
+
+            @if ($unpaid)
+                @if ($unpaid->method)
+                    <div class="border border-gray-200 rounded-md p-4 mb-4">
+                        <p class="font-medium text-gray-900">{{ $unpaid->method->name }}</p>
+                        @if ($unpaid->method->description)
+                            <p class="text-sm text-gray-600 mt-1">{{ $unpaid->method->description }}</p>
+                        @endif
+                        @if ($unpaid->method->instructions)
+                            <p class="text-sm text-gray-600 mt-1 whitespace-pre-wrap">{{ $unpaid->method->instructions }}</p>
+                        @endif
+                        @php $config = (array) ($unpaid->method->configuration ?? []); @endphp
+                        @if ($config)
+                            <div class="mt-3 border-t border-gray-100 pt-3">
+                                <p class="text-xs uppercase tracking-wide text-gray-400 mb-2">Payment details</p>
+                                <dl class="grid grid-cols-1 gap-2 text-sm">
+                                    @foreach ($config as $key => $value)
+                                        @if ($value === null || $value === '')
+                                            @continue
+                                        @endif
+                                        @if ($key === 'qr_image')
+                                            <div class="col-span-full">
+                                                @if (str_starts_with((string) $value, 'data:image') || str_starts_with((string) $value, 'http'))
+                                                    <img src="{{ $value }}" alt="QR code" class="w-40 h-40 object-contain border border-gray-200 rounded-md">
+                                                @else
+                                                    <p class="font-mono text-gray-700 break-all">{{ $value }}</p>
+                                                @endif
+                                            </div>
+                                            @continue
+                                        @endif
+                                        <div class="flex justify-between gap-4">
+                                            <dt class="text-gray-500">{{ ucwords(str_replace('_', ' ', $key)) }}</dt>
+                                            <dd class="font-medium text-right break-all font-mono">{{ $value }}</dd>
+                                        </div>
+                                    @endforeach
+                                </dl>
+                            </div>
+                        @endif
+                        <p class="mt-3 text-xs text-gray-400">
+                            <a href="#" onclick="event.preventDefault(); document.getElementById('change-method').submit();" class="text-blue-600 hover:underline">Change payment method</a>
+                        </p>
+                        <form id="change-method" method="POST" action="{{ route('orders.payment-method', $order) }}" class="hidden">
+                            @csrf
+                            <input type="hidden" name="token" value="{{ $token }}">
+                        </form>
+                    </div>
+                @else
+                    <p class="text-sm text-gray-600 mb-3">Choose a payment method to see payment instructions.</p>
+                    <div class="space-y-2 mb-4">
+                        @forelse ($methods as $method)
+                            <form method="POST" action="{{ route('orders.payment-method', $order) }}">
+                                @csrf
+                                <input type="hidden" name="method_id" value="{{ $method->id }}">
+                                <input type="hidden" name="token" value="{{ $token }}">
+                                <button type="submit" class="w-full text-left border border-gray-200 rounded-md p-4 hover:border-blue-400 hover:bg-blue-50 transition">
+                                    <span class="font-medium text-gray-900">{{ $method->name }}</span>
+                                    @if ($method->description)
+                                        <span class="block text-sm text-gray-500 mt-0.5">{{ $method->description }}</span>
+                                    @endif
+                                </button>
+                            </form>
+                        @empty
+                            <p class="text-sm text-gray-500">No payment methods are currently active. Please contact support.</p>
+                        @endforelse
+                    </div>
+                @endif
+            @endif
+
             @foreach ($order->payments as $payment)
+                @if ($payment->id === $unpaid?->id && $payment->method)
+                    @continue
+                @endif
                 <div class="border border-gray-200 rounded-md p-4 mb-4">
                     <p class="font-medium text-gray-900">{{ $payment->method?->name ?? 'Manual payment' }}</p>
                     @if ($payment->method?->instructions)

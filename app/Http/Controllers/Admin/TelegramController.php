@@ -20,6 +20,7 @@ class TelegramController extends Controller
             'payment_proof' => 'Payment proof',
             'payment_verified' => 'Payment verified',
             'payment_rejected' => 'Payment rejected',
+            'payment_refunded' => 'Payment refunded',
             'processing' => 'Processing',
             'waiting_for_customer' => 'Waiting for customer',
             'completed' => 'Completed',

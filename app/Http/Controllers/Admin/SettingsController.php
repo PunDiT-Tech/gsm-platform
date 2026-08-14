@@ -18,8 +18,9 @@ class SettingsController extends Controller
         $contactEmail = WebsiteSetting::get('contact_email', '');
         $contactPhone = WebsiteSetting::get('contact_phone', '');
         $orderExpiryHours = WebsiteSetting::get('order_expiry_hours', config('app.order_expiry_hours'));
+        $apiKey = WebsiteSetting::get('api_key', '');
 
-        return view('admin.settings.index', compact('methods', 'contactEmail', 'contactPhone', 'orderExpiryHours'));
+        return view('admin.settings.index', compact('methods', 'contactEmail', 'contactPhone', 'orderExpiryHours', 'apiKey'));
     }
 
     public function updateWebsite(Request $request): RedirectResponse
@@ -28,11 +29,13 @@ class SettingsController extends Controller
             'contact_email' => ['nullable', 'email'],
             'contact_phone' => ['nullable', 'string', 'max:32'],
             'order_expiry_hours' => ['required', 'integer', 'min:1', 'max:720'],
+            'api_key' => ['nullable', 'string', 'min:16', 'max:128'],
         ]);
 
         WebsiteSetting::set('contact_email', $data['contact_email']);
         WebsiteSetting::set('contact_phone', $data['contact_phone']);
         WebsiteSetting::set('order_expiry_hours', $data['order_expiry_hours']);
+        WebsiteSetting::set('api_key', $data['api_key'] ?? '');
         AuditLogger::log('settings.update', null, null, $data);
 
         return back()->with('status', 'Settings saved.');

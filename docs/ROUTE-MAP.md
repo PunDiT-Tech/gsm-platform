@@ -88,3 +88,10 @@ GET     /admin/files/{file}         Authorized download of proofs/results
 GET /up                       Health check
 scheduler: every minute       Scheduler (queue, order maintenance)
 ```
+
+## API (`/api`, Bearer token from Settings > API key)
+```
+GET  /api/services                 Active services list
+GET  /api/services/{slug}          Single service
+POST /api/orders/lookup            Order lookup (order_number + tracking_code)
+```

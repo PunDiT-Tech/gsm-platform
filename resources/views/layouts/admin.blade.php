@@ -18,6 +18,7 @@
                     @php
                         $items = [
                             ['route' => 'admin.dashboard', 'label' => 'Dashboard', 'icon' => '📊', 'permission' => null],
+                            ['route' => 'admin.notifications.index', 'label' => 'Notifications', 'icon' => '🔔', 'permission' => null],
                             ['route' => 'admin.orders.index', 'label' => 'Orders', 'icon' => '🧾', 'permission' => 'orders.view'],
                             ['route' => 'admin.services.index', 'label' => 'Services', 'icon' => '🔧', 'permission' => 'services.view'],
                             ['route' => 'admin.categories.index', 'label' => 'Categories', 'icon' => '🗂️', 'permission' => 'services.view'],

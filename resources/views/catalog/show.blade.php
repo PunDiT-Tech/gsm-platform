@@ -1,11 +1,15 @@
 @extends('layouts.app')
 
 @section('title', $service->name)
+@section('meta_description', Str::limit($service->short_description ?? '', 160))
 
 @push('head')
-<meta name="description" content="{{ Str::limit($service->short_description, 160) }}">
 <meta property="og:title" content="{{ $service->name }}">
 <meta property="og:description" content="{{ Str::limit($service->short_description, 160) }}">
+@if ($service->image)
+<meta property="og:image" content="{{ route('services.image', $service) }}">
+<meta name="twitter:image" content="{{ route('services.image', $service) }}">
+@endif
 @endpush
 
 @section('content')
@@ -34,7 +38,11 @@
                 @endif
 
                 <div class="flex items-center gap-4 mb-4">
-                    <span class="text-5xl">{{ $service->icon ?? '🔧' }}</span>
+                    @if ($service->image)
+                        <img src="{{ route('services.image', $service) }}" alt="{{ $service->name }}" class="w-20 h-20 object-cover rounded-lg border border-gray-200">
+                    @else
+                        <span class="text-5xl">{{ $service->icon ?? '🔧' }}</span>
+                    @endif
                     <div>
                         <h1 class="text-3xl font-bold text-gray-900">{{ $service->name }}</h1>
                         <span class="px-2 py-0.5 rounded-full text-xs {{ $service->is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">{{ $service->is_active ? 'Online' : 'Offline' }}</span>
@@ -114,7 +122,7 @@
                             </div>
                         @endif
 
-                        <form method="POST" action="{{ route('orders.store') }}" enctype="multipart/form-data" class="space-y-4">
+                        <form method="POST" action="{{ route('orders.review') }}" enctype="multipart/form-data" class="space-y-4">
                             @csrf
                             <input type="hidden" name="service_slug" value="{{ $service->slug }}">
 
@@ -163,4 +171,18 @@
             </div>
         </div>
     </div>
+
+    @if ($faqs->isNotEmpty())
+        <div class="max-w-4xl mx-auto mt-12">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6 text-center">Frequently asked questions</h2>
+            <div class="space-y-3">
+                @foreach ($faqs as $faq)
+                    <details class="bg-white border border-gray-200 rounded-lg p-4">
+                        <summary class="font-medium text-gray-900 cursor-pointer">{{ $faq->question }}</summary>
+                        <p class="text-sm text-gray-600 mt-2">{{ $faq->answer }}</p>
+                    </details>
+                @endforeach
+            </div>
+        </div>
+    @endif
 @endsection

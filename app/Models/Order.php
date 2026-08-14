@@ -62,6 +62,11 @@ class Order extends Model
         return $this->hasMany(Payment::class);
     }
 
+    public function refunds(): HasMany
+    {
+        return $this->hasMany(Refund::class);
+    }
+
     public function couponUsage(): HasOne
     {
         return $this->hasOne(CouponUsage::class);

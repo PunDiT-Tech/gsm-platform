@@ -29,6 +29,34 @@ class PaymentController extends Controller
         return view('orders.payment', compact('order', 'token', 'methods'));
     }
 
+    public function selectMethod(Request $request, Order $order): RedirectResponse
+    {
+        $isOwner = auth()->check() && auth()->user()->id === $order->customer?->user_id;
+        $validToken = $request->token && Hash::check($request->token, $order->tracking_token);
+
+        if (! $isOwner && ! $validToken) {
+            abort(403);
+        }
+
+        $request->validate([
+            'method_id' => ['required', 'exists:payment_methods,id'],
+            'token' => ['nullable', 'string'],
+        ]);
+
+        DB::transaction(function () use ($order, $request) {
+            $payment = $order->payments()->where('status', 'UNPAID')->latest()->first();
+            abort_unless($payment, 404);
+
+            $payment->update(['payment_method_id' => $request->method_id]);
+        });
+
+        if ($isOwner) {
+            return redirect()->route('orders.pay', $order)->with('status', 'Payment method selected.');
+        }
+
+        return redirect()->route('orders.payment', [$order->order_number, $request->token])->with('status', 'Payment method selected.');
+    }
+
     public function upload(Request $request, Order $order): RedirectResponse
     {
         $isOwner = auth()->check() && auth()->user()->id === $order->customer?->user_id;
@@ -71,6 +99,12 @@ class PaymentController extends Controller
         });
 
         \App\Jobs\SendTelegramOrderNotification::dispatch($order, 'payment_proof');
+        \App\Helpers\StaffNotifier::notify('Payment proof', 'Payment proof submitted for order ' . $order->order_number . '.');
+
+        if ($order->customer?->user_id) {
+            $user = \App\Models\User::find($order->customer->user_id);
+            $user?->notify(new \App\Notifications\PaymentProofReceivedNotification($order));
+        }
 
         return back()->with('status', 'Payment proof submitted. We will review it shortly.');
     }

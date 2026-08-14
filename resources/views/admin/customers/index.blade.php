@@ -19,6 +19,7 @@
                     <th class="px-4 py-3 text-left text-gray-600 font-medium">Email</th>
                     <th class="px-4 py-3 text-left text-gray-600 font-medium">Phone</th>
                     <th class="px-4 py-3 text-left text-gray-600 font-medium">Orders</th>
+                    <th class="px-4 py-3 text-left text-gray-600 font-medium">Status</th>
                     <th class="px-4 py-3 text-left text-gray-600 font-medium">Registered</th>
                 </tr>
             </thead>
@@ -29,10 +30,17 @@
                         <td class="px-4 py-3">{{ $customer->email }}</td>
                         <td class="px-4 py-3">{{ $customer->phone }}</td>
                         <td class="px-4 py-3">{{ $customer->orders_count }}</td>
+                        <td class="px-4 py-3">
+                            @if ($customer->user_id)
+                                <span class="px-2 py-0.5 rounded-full text-xs {{ $customer->user->is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">{{ $customer->user->is_active ? 'Active' : 'Suspended' }}</span>
+                            @else
+                                <span class="px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-600">Guest</span>
+                            @endif
+                        </td>
                         <td class="px-4 py-3 text-gray-500">{{ $customer->created_at->format('M d, Y') }}</td>
                     </tr>
                 @empty
-                    <tr><td colspan="5" class="px-4 py-8 text-center text-gray-500">No customers found.</td></tr>
+                    <tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">No customers found.</td></tr>
                 @endforelse
             </tbody>
         </table>

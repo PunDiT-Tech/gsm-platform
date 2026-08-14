@@ -30,6 +30,7 @@ class SendTelegramOrderNotification implements ShouldQueue
             'payment_proof' => '🧾',
             'payment_verified' => '✅',
             'payment_rejected' => '❌',
+            'payment_refunded' => '💰',
             'processing' => '🔄',
             'waiting_for_customer' => '📩',
             'completed' => '🎉',

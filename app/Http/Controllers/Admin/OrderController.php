@@ -45,7 +45,10 @@ class OrderController extends Controller
             'results.user',
             'payments.method',
             'payments.proofs',
+            'payments.refunds',
         ]);
+
+        OrderMessage::where('order_id', $order->id)->whereNull('read_at')->update(['read_at' => now()]);
 
         $statuses = ['PENDING', 'PROCESSING', 'WAITING_FOR_CUSTOMER', 'COMPLETED', 'REJECTED', 'CANCELLED'];
 

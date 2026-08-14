@@ -60,6 +60,39 @@ class ServiceContentController extends Controller
         return redirect()->route('admin.services.edit', $service)->with('status', 'Field deleted.')->withFragment('fields');
     }
 
+    public function updateField(Request $request, Service $service, ServiceField $field): RedirectResponse
+    {
+        $data = $request->validate([
+            'label' => ['required', 'string', 'max:255'],
+            'internal_name' => ['nullable', 'string', 'max:255'],
+            'placeholder' => ['nullable', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
+            'is_required' => ['boolean'],
+            'validation_regex' => ['nullable', 'string', 'max:255'],
+            'min_length' => ['nullable', 'integer', 'min:0'],
+            'max_length' => ['nullable', 'integer', 'min:1'],
+            'sort_order' => ['nullable', 'integer', 'min:0'],
+            'is_active' => ['boolean'],
+        ]);
+
+        $data['is_required'] = $request->boolean('is_required');
+        $data['is_active'] = $request->boolean('is_active');
+        $data['sort_order'] = $data['sort_order'] ?? 0;
+
+        $field->update($data);
+        \App\Helpers\AuditLogger::log('service.field.update', $field);
+
+        return redirect()->route('admin.services.edit', $service)->with('status', 'Field updated.')->withFragment('fields');
+    }
+
+    public function toggleField(Service $service, ServiceField $field): RedirectResponse
+    {
+        $field->update(['is_active' => ! $field->is_active]);
+        \App\Helpers\AuditLogger::log('service.field.toggle', $field);
+
+        return redirect()->route('admin.services.edit', $service)->with('status', 'Field updated.')->withFragment('fields');
+    }
+
     // ---- Information blocks (Stage 8) ----
 
     public function storeBlock(Request $request, Service $service): RedirectResponse
@@ -84,6 +117,34 @@ class ServiceContentController extends Controller
         $block->delete();
 
         return redirect()->route('admin.services.edit', $service)->with('status', 'Block deleted.')->withFragment('blocks');
+    }
+
+    public function updateBlock(Request $request, Service $service, ServiceInformationBlock $block): RedirectResponse
+    {
+        $data = $request->validate([
+            'type' => ['required', 'in:INFORMATION,NOTICE,WARNING,INSTRUCTION,FAQ,LINK,DOWNLOAD,IMAGE,VIDEO'],
+            'title' => ['nullable', 'string', 'max:255'],
+            'content' => ['nullable', 'string'],
+            'url' => ['nullable', 'url'],
+            'sort_order' => ['nullable', 'integer', 'min:0'],
+            'is_active' => ['boolean'],
+        ]);
+
+        $data['sort_order'] = $data['sort_order'] ?? 0;
+        $data['is_active'] = $request->boolean('is_active');
+
+        $block->update($data);
+        \App\Helpers\AuditLogger::log('service.block.update', $block);
+
+        return redirect()->route('admin.services.edit', $service)->with('status', 'Block updated.')->withFragment('blocks');
+    }
+
+    public function toggleBlock(Service $service, ServiceInformationBlock $block): RedirectResponse
+    {
+        $block->update(['is_active' => ! $block->is_active]);
+        \App\Helpers\AuditLogger::log('service.block.toggle', $block);
+
+        return redirect()->route('admin.services.edit', $service)->with('status', 'Block updated.')->withFragment('blocks');
     }
 
     // ---- Links (Stage 9) ----
@@ -111,5 +172,34 @@ class ServiceContentController extends Controller
         $link->delete();
 
         return redirect()->route('admin.services.edit', $service)->with('status', 'Link deleted.')->withFragment('links');
+    }
+
+    public function updateLink(Request $request, Service $service, ServiceLink $link): RedirectResponse
+    {
+        $data = $request->validate([
+            'title' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string', 'max:255'],
+            'url' => ['required', 'url', 'not_regex:/^javascript:/i'],
+            'open_new_tab' => ['boolean'],
+            'sort_order' => ['nullable', 'integer', 'min:0'],
+            'is_active' => ['boolean'],
+        ]);
+
+        $data['open_new_tab'] = $request->boolean('open_new_tab');
+        $data['is_active'] = $request->boolean('is_active');
+        $data['sort_order'] = $data['sort_order'] ?? 0;
+
+        $link->update($data);
+        \App\Helpers\AuditLogger::log('service.link.update', $link);
+
+        return redirect()->route('admin.services.edit', $service)->with('status', 'Link updated.')->withFragment('links');
+    }
+
+    public function toggleLink(Service $service, ServiceLink $link): RedirectResponse
+    {
+        $link->update(['is_active' => ! $link->is_active]);
+        \App\Helpers\AuditLogger::log('service.link.toggle', $link);
+
+        return redirect()->route('admin.services.edit', $service)->with('status', 'Link updated.')->withFragment('links');
     }
 }

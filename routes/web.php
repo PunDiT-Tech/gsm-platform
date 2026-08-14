@@ -22,6 +22,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/services', [HomeController::class, 'services'])->name('services.index');
+Route::get('/uploads/service-image/{service}', [ServiceController::class, 'image'])->name('services.image');
+Route::get('/uploads/showcase-image/{showcase}/{variant}', [HomeController::class, 'showcaseImage'])->name('showcase.image');
 Route::get('/services/{slug}', [ServiceController::class, 'show'])->name('services.show');
 Route::view('/how-it-works', 'pages.how-it-works')->name('how-it-works');
 Route::get('/faq', [HomeController::class, 'faq'])->name('faq');
@@ -30,9 +32,12 @@ Route::get('/contact', [HomeController::class, 'contact'])->name('contact');
 Route::post('/contact', [HomeController::class, 'contactSubmit'])->middleware('throttle:contact')->name('contact.submit');
 Route::get('/check-order', [CheckOrderController::class, 'create'])->name('order.lookup');
 Route::post('/check-order', [CheckOrderController::class, 'lookup'])->middleware('throttle:order-lookup')->name('order.lookup.submit');
+Route::post('/orders/review', [OrderController::class, 'review'])->middleware('throttle:orders')->name('orders.review');
+Route::get('/orders/review', [OrderController::class, 'reviewPage'])->name('orders.review-page');
 Route::post('/orders', [OrderController::class, 'store'])->middleware('throttle:orders')->name('orders.store');
 Route::get('/orders/{order}/{token}', [OrderController::class, 'confirmation'])->name('orders.confirmation');
 Route::get('/orders/{order}/{token}/pay', [PaymentController::class, 'show'])->name('orders.payment');
+Route::post('/orders/{order}/payment-method', [PaymentController::class, 'selectMethod'])->middleware('throttle:uploads')->name('orders.payment-method');
 Route::post('/orders/{order}/payment', [PaymentController::class, 'upload'])->middleware('throttle:uploads')->name('orders.payment.upload');
 
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
@@ -77,6 +82,7 @@ Route::middleware('auth')->group(function () {
     Route::post('dashboard/support', [SupportTicketController::class, 'store'])->middleware('throttle:support')->name('support.store');
     Route::get('dashboard/support/{ticket}', [SupportTicketController::class, 'show'])->name('support.show');
     Route::post('dashboard/support/{ticket}/reply', [SupportTicketController::class, 'reply'])->middleware('throttle:support')->name('support.reply');
+    Route::get('dashboard/support/message/{message}/download', [SupportTicketController::class, 'downloadAttachment'])->name('support.attachment-download');
 
     Route::get('verify-email', EmailVerificationPromptController::class)->name('verification.notice');
     Route::get('verify-email/{id}/{hash}', VerifyEmailController::class)->middleware(['signed', 'throttle:6,1'])->name('verification.verify');

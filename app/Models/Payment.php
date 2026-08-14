@@ -32,4 +32,9 @@ class Payment extends Model
     {
         return $this->hasMany(PaymentProof::class);
     }
+
+    public function refunds(): HasMany
+    {
+        return $this->hasMany(Refund::class);
+    }
 }

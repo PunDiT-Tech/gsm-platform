@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\SupportMessage;
 use App\Models\SupportTicket;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -14,28 +15,43 @@ class SupportController extends Controller
 {
     public function index(): View
     {
-        $tickets = SupportTicket::with(['customer', 'assignee'])->latest()->paginate(20);
+        $tickets = SupportTicket::with(['customer', 'assignee', 'messages' => fn ($q) => $q->whereNull('read_at')->whereNotNull('user_id')])
+            ->latest()
+            ->paginate(20);
 
         return view('admin.support.index', compact('tickets'));
     }
 
     public function show(SupportTicket $ticket): View
     {
+        $staff = User::whereHas('roles')->orderBy('name')->get();
+
         $ticket->load(['messages.user', 'customer']);
 
-        return view('admin.support.show', compact('ticket'));
+        SupportMessage::where('support_ticket_id', $ticket->id)
+            ->whereNull('read_at')
+            ->whereNull('user_id')
+            ->update(['read_at' => now()]);
+
+        return view('admin.support.show', compact('ticket', 'staff'));
     }
 
     public function reply(Request $request, SupportTicket $ticket): RedirectResponse
     {
         $request->validate([
             'message' => ['required', 'string', 'max:4000'],
+            'attachment' => ['nullable', 'file', 'max:10240', 'mimes:jpg,jpeg,png,pdf'],
         ]);
+
+        $path = $request->hasFile('attachment')
+            ? $request->file('attachment')->store('support-files', 'local')
+            : null;
 
         SupportMessage::create([
             'support_ticket_id' => $ticket->id,
             'user_id' => $request->user()->id,
             'message' => $request->message,
+            'attachment_path' => $path,
         ]);
 
         if ($ticket->status === 'CLOSED') {
@@ -66,5 +82,12 @@ class SupportController extends Controller
         $ticket->update(['status' => $request->status]);
 
         return back()->with('status', 'Ticket updated.');
+    }
+
+    public function downloadAttachment(SupportMessage $message)
+    {
+        abort_unless($message->attachment_path, 404);
+
+        return Storage::disk('local')->download($message->attachment_path);
     }
 }

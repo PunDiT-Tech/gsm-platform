@@ -20,7 +20,12 @@
             <tbody class="divide-y divide-gray-200">
                 @forelse ($tickets as $ticket)
                     <tr class="hover:bg-gray-50">
-                        <td class="px-4 py-3"><a href="{{ route('admin.support.show', $ticket) }}" class="text-blue-600 hover:underline font-medium">{{ $ticket->subject }}</a></td>
+                        <td class="px-4 py-3">
+                            <a href="{{ route('admin.support.show', $ticket) }}" class="text-blue-600 hover:underline font-medium">{{ $ticket->subject }}</a>
+                            @if ($ticket->messages->isNotEmpty())
+                                <span class="ml-2 px-2 py-0.5 rounded-full text-xs bg-amber-100 text-amber-700">{{ $ticket->messages->count() }} new</span>
+                            @endif
+                        </td>
                         <td class="px-4 py-3">{{ $ticket->customer?->name ?? '—' }}</td>
                         <td class="px-4 py-3 font-mono text-xs">{{ $ticket->order_number ?? '—' }}</td>
                         <td class="px-4 py-3"><span class="px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-700">{{ $ticket->status }}</span></td>

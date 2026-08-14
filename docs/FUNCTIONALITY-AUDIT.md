@@ -32,7 +32,7 @@ Status of each major feature.
 | Refunds | PARTIAL | Record table + structure; processing is manual |
 | Coupons | PASS | Percent/fixed discounts, usage limits, per-customer limits, service restriction, expiry, admin management |
 | Customer consent | PASS | Configurable consent checkbox; consent value + timestamp persisted on the order |
-| SEO | PARTIAL | Sitemap, meta tags, clean URLs; canonical + Open Graph/Twitter meta not yet site-wide |
+| SEO | PASS | Sitemap, meta tags, clean URLs; canonical + Open Graph/Twitter meta site-wide |
 | Legal pages | PASS | Terms/Privacy/Refunds/Acceptable Use |
 | Reports | PASS | Revenue/orders by service, payment methods, date range |
 | System health | PASS | DB, storage, queue, cache, scheduler, telegram, mail, disk |

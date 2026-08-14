@@ -154,7 +154,14 @@
                                 @if ($proof->transaction_id)<p class="text-gray-500">Tx: {{ $proof->transaction_id }}</p>@endif
                             </div>
                         @endforeach
-                        @if ($payment->status !== 'VERIFIED' && $payment->status !== 'REJECTED')
+                        @foreach ($payment->refunds as $refund)
+                            <div class="mt-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-md p-2">
+                                Refund: {{ $refund->amount }} {{ $refund->currency }} @if ($refund->method)via {{ $refund->method }}@endif
+                                @if ($refund->reason)<span class="text-gray-600">— {{ $refund->reason }}</span>@endif
+                                @if ($refund->reference)<span class="text-gray-600">({{ $refund->reference }})</span>@endif
+                            </div>
+                        @endforeach
+                        @if ($payment->status !== 'VERIFIED' && $payment->status !== 'REJECTED' && $payment->status !== 'REFUNDED')
                             <div class="flex gap-2 mt-3">
                                 <form method="POST" action="{{ route('admin.payments.verify', $payment) }}">
                                     @csrf
@@ -165,6 +172,20 @@
                                     <button class="bg-red-600 text-white px-3 py-1.5 rounded-md text-xs hover:bg-red-700">Reject</button>
                                 </form>
                             </div>
+                        @endif
+                        @if ($payment->status === 'VERIFIED' && auth()->user()->hasPermission('payments.refund'))
+                            <form method="POST" action="{{ route('admin.payments.refund', $payment) }}" class="mt-3 border-t border-gray-100 pt-3 space-y-2">
+                                @csrf
+                                <p class="text-xs text-gray-500">Record a refund (marks payment + order as refunded).</p>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <input type="number" step="0.01" min="0.01" max="{{ $payment->amount }}" name="amount" value="{{ $payment->amount }}" required
+                                        class="rounded-md border-gray-300 shadow-sm text-sm">
+                                    <input type="text" name="method" placeholder="Method" class="rounded-md border-gray-300 shadow-sm text-sm">
+                                </div>
+                                <input type="text" name="reference" placeholder="Reference" class="w-full rounded-md border-gray-300 shadow-sm text-sm">
+                                <textarea name="reason" rows="1" placeholder="Reason" class="w-full rounded-md border-gray-300 shadow-sm text-sm"></textarea>
+                                <button class="w-full bg-amber-600 text-white px-3 py-1.5 rounded-md text-xs hover:bg-amber-700">Record refund</button>
+                            </form>
                         @endif
                     </div>
                 @empty

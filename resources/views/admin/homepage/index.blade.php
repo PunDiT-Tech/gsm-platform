@@ -1,15 +1,93 @@
 @extends('layouts.admin')
 
-@section('title', 'Homepage Showcase')
+@section('title', 'Homepage CMS')
 
 @section('content')
-    <h1 class="text-2xl font-bold text-gray-900 mb-6">Homepage showcase</h1>
+    <h1 class="text-2xl font-bold text-gray-900 mb-6">Homepage CMS</h1>
+
+    @if (session('status'))
+        <div class="mb-4 bg-green-50 border border-green-200 text-green-800 text-sm px-4 py-3 rounded-md">{{ session('status') }}</div>
+    @endif
 
     @if ($errors->any())
         <div class="mb-4 bg-red-50 border border-red-200 text-red-800 text-sm px-4 py-3 rounded-md">
             <ul class="list-disc pl-4 space-y-1">@foreach ($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>
         </div>
     @endif
+
+    <div class="bg-white border border-gray-200 rounded-lg p-6 mb-8">
+        <h2 class="font-semibold text-gray-900 mb-4">Page content</h2>
+        <form method="POST" action="{{ route('admin.homepage.content') }}" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            @csrf
+            @php $hero = $sections['hero'] ?? null; @endphp
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Hero title</label>
+                <input type="text" name="hero_title" value="{{ $hero?->title }}"
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-sm">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Hero subtitle</label>
+                <input type="text" name="hero_subtitle" value="{{ is_array($hero?->content) ? '' : $hero?->content }}"
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-sm">
+            </div>
+            @php $stats = is_array($sections['stats']?->content) ? $sections['stats']->content : []; @endphp
+            <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Stats</label>
+                <div id="stats-rows" class="space-y-2">
+                    @forelse ($stats as $i => $row)
+                        <div class="flex gap-2">
+                            <input type="text" name="stats_value[]" value="{{ $row['value'] ?? '' }}" placeholder="Value" class="block w-32 rounded-md border-gray-300 shadow-sm text-sm">
+                            <input type="text" name="stats_label[]" value="{{ $row['label'] ?? '' }}" placeholder="Label" class="block flex-1 rounded-md border-gray-300 shadow-sm text-sm">
+                        </div>
+                    @empty
+                        <div class="flex gap-2">
+                            <input type="text" name="stats_value[]" placeholder="Value" class="block w-32 rounded-md border-gray-300 shadow-sm text-sm">
+                            <input type="text" name="stats_label[]" placeholder="Label" class="block flex-1 rounded-md border-gray-300 shadow-sm text-sm">
+                        </div>
+                    @endforelse
+                </div>
+                <button type="button" onclick="document.getElementById('stats-rows').insertAdjacentHTML('beforeend','<div class=\'flex gap-2\'><input type=\'text\' name=\'stats_value[]\' placeholder=\'Value\' class=\'block w-32 rounded-md border-gray-300 shadow-sm text-sm\'><input type=\'text\' name=\'stats_label[]\' placeholder=\'Label\' class=\'block flex-1 rounded-md border-gray-300 shadow-sm text-sm\'></div>')" class="mt-2 text-sm text-blue-600 hover:underline">+ Add stat</button>
+            </div>
+            @php $steps = is_array($sections['how_it_works']?->content) ? $sections['how_it_works']->content : []; @endphp
+            <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-2">How it works steps</label>
+                <div id="steps-rows" class="space-y-2">
+                    @forelse ($steps as $i => $step)
+                        <div class="flex gap-2">
+                            <input type="text" name="step_title[]" value="{{ $step['title'] ?? '' }}" placeholder="Step title" class="block flex-1 rounded-md border-gray-300 shadow-sm text-sm">
+                            <input type="text" name="step_text[]" value="{{ $step['text'] ?? '' }}" placeholder="Step text" class="block flex-1 rounded-md border-gray-300 shadow-sm text-sm">
+                        </div>
+                    @empty
+                        <div class="flex gap-2">
+                            <input type="text" name="step_title[]" placeholder="Step title" class="block flex-1 rounded-md border-gray-300 shadow-sm text-sm">
+                            <input type="text" name="step_text[]" placeholder="Step text" class="block flex-1 rounded-md border-gray-300 shadow-sm text-sm">
+                        </div>
+                    @endforelse
+                </div>
+                <button type="button" onclick="document.getElementById('steps-rows').insertAdjacentHTML('beforeend','<div class=\'flex gap-2\'><input type=\'text\' name=\'step_title[]\' placeholder=\'Step title\' class=\'block flex-1 rounded-md border-gray-300 shadow-sm text-sm\'><input type=\'text\' name=\'step_text[]\' placeholder=\'Step text\' class=\'block flex-1 rounded-md border-gray-300 shadow-sm text-sm\'></div>')" class="mt-2 text-sm text-blue-600 hover:underline">+ Add step</div>
+            </div>
+            @php $cta = $sections['cta'] ?? null; @endphp
+            <div>
+                <label class="block text-sm font-medium text-gray-700">CTA title</label>
+                <input type="text" name="cta_title" value="{{ $cta?->title }}"
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-sm">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">CTA subtitle</label>
+                <input type="text" name="cta_subtitle" value="{{ is_array($cta?->content) ? '' : $cta?->content }}"
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-sm">
+            </div>
+            @php $footer = $sections['footer'] ?? null; @endphp
+            <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700">Footer copyright</label>
+                <input type="text" name="footer_copyright" value="{{ $footer?->title }}"
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-sm">
+            </div>
+            <div class="md:col-span-2">
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md text-sm">Save content</button>
+            </div>
+        </form>
+    </div>
 
     <div class="space-y-6 mb-8">
         @foreach ($showcases as $showcase)
@@ -22,7 +100,7 @@
                         <button class="text-red-600 hover:underline text-sm">Delete</button>
                     </form>
                 </div>
-                <form method="POST" action="{{ route('admin.homepage.update', $showcase) }}" class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <form method="POST" action="{{ route('admin.homepage.update', $showcase) }}" enctype="multipart/form-data" class="grid grid-cols-1 md:grid-cols-3 gap-3">
                     @csrf
                     @method('PUT')
                     <div>
@@ -68,6 +146,22 @@
                             @endforeach
                         </select>
                     </div>
+                    @foreach (['image' => 'Image', 'desktop_image' => 'Desktop image', 'mobile_image' => 'Mobile image'] as $key => $label)
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">{{ $label }} <span class="text-xs text-gray-400">(JPG/PNG/WebP ≤ 5MB)</span></label>
+                            <input type="file" name="{{ $key }}" accept=".jpg,.jpeg,.png,.webp"
+                                class="mt-1 block w-full text-sm text-gray-500 file:mr-3 file:rounded-md file:border-0 file:bg-blue-50 file:px-3 file:py-2 file:text-blue-700">
+                            @if ($showcase->{$key})
+                                <div class="flex items-center gap-2 mt-1.5">
+                                    <img src="{{ route('showcase.image', [$showcase, $key]) }}" alt="{{ $label }}" class="w-14 h-14 object-cover rounded-md border border-gray-200">
+                                    <label class="flex items-center text-xs text-gray-600">
+                                        <input type="checkbox" name="remove_{{ $key }}" value="1" class="rounded border-gray-300 text-blue-600">
+                                        <span class="ml-1">Remove</span>
+                                    </label>
+                                </div>
+                            @endif
+                        </div>
+                    @endforeach
                     <div class="flex items-end gap-4 col-span-1 md:col-span-3">
                         <label class="flex items-center text-sm text-gray-700">
                             <input type="checkbox" name="is_active" value="1" @checked($showcase->is_active) class="rounded border-gray-300 text-blue-600">
@@ -86,7 +180,7 @@
 
     <div class="bg-white border border-gray-200 rounded-lg p-6">
         <h2 class="font-semibold text-gray-900 mb-4">Add slide</h2>
-        <form method="POST" action="{{ route('admin.homepage.store') }}" class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <form method="POST" action="{{ route('admin.homepage.store') }}" enctype="multipart/form-data" class="grid grid-cols-1 md:grid-cols-3 gap-3">
             @csrf
             <div>
                 <label class="block text-sm font-medium text-gray-700">Title</label>
@@ -127,6 +221,13 @@
                     <option value="ZOOM">ZOOM</option>
                 </select>
             </div>
+            @foreach (['image' => 'Image', 'desktop_image' => 'Desktop image', 'mobile_image' => 'Mobile image'] as $key => $label)
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">{{ $label }} <span class="text-xs text-gray-400">(JPG/PNG/WebP ≤ 5MB)</span></label>
+                    <input type="file" name="{{ $key }}" accept=".jpg,.jpeg,.png,.webp"
+                        class="mt-1 block w-full text-sm text-gray-500 file:mr-3 file:rounded-md file:border-0 file:bg-blue-50 file:px-3 file:py-2 file:text-blue-700">
+                </div>
+            @endforeach
             <div class="md:col-span-3 flex items-end gap-4">
                 <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md text-sm">Add slide</button>
             </div>

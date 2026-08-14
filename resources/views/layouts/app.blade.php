@@ -4,6 +4,13 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="description" content="@yield('meta_description', config('app.name') . ' — Professional GSM device repair, diagnostics and maintenance services.')">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="{{ url()->current() }}">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="{{ config('app.name') }}">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta name="twitter:card" content="summary_large_image">
     <title>@yield('title', config('app.name'))</title>
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700" rel="stylesheet" />
@@ -46,7 +53,7 @@
 
         <footer class="bg-white border-t border-gray-200 mt-16">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 flex flex-col sm:flex-row items-center justify-between text-sm text-gray-500 gap-4">
-                <p>&copy; {{ date('Y') }} {{ config('app.name') }}. All rights reserved.</p>
+                <p>&copy; {{ date('Y') }} {{ \App\Models\HomepageSection::where('key', 'footer')->value('title') ?: config('app.name') }}. All rights reserved.</p>
                 <div class="flex gap-4">
                     <a href="{{ route('page', 'terms') }}" class="hover:text-blue-600">Terms</a>
                     <a href="{{ route('page', 'privacy') }}" class="hover:text-blue-600">Privacy</a>

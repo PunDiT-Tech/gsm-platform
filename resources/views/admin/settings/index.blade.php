@@ -35,6 +35,11 @@
                     <input type="number" name="order_expiry_hours" min="1" max="720" value="{{ old('order_expiry_hours', $orderExpiryHours) }}"
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
                 </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">API key <span class="text-xs text-gray-400">(Bearer token for /api endpoints)</span></label>
+                    <input type="text" name="api_key" value="{{ old('api_key', $apiKey) }}" placeholder="min 16 characters"
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm font-mono">
+                </div>
                 <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm">Save</button>
             </form>
         </div>

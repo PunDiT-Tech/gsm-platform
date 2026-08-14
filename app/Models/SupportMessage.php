@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class SupportMessage extends Model
 {
-    protected $fillable = ['support_ticket_id', 'user_id', 'customer_id', 'message', 'attachment_path'];
+    protected $fillable = ['support_ticket_id', 'user_id', 'customer_id', 'message', 'attachment_path', 'read_at'];
+
+    protected $casts = ['read_at' => 'datetime'];
 
     public function ticket(): BelongsTo
     {
@@ -17,5 +19,10 @@ class SupportMessage extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class);
     }
 }

@@ -49,6 +49,8 @@ class SupportTicketController extends Controller
             'attachment_path' => $path,
         ]);
 
+        \App\Helpers\StaffNotifier::notify('New support ticket', 'Ticket "' . $ticket->subject . '" opened by ' . ($customer?->name ?? 'guest') . '.');
+
         return redirect()->route('support.show', $ticket)->with('status', 'Ticket created. We will respond shortly.');
     }
 
@@ -59,6 +61,8 @@ class SupportTicketController extends Controller
         abort_if($ticket->customer_id !== $customer?->id, 403);
 
         $ticket->load(['messages.user', 'customer']);
+
+        $ticket->messages->whereNull('read_at')->whereNotNull('user_id')->each->update(['read_at' => now()]);
 
         return view('support.show', compact('ticket'));
     }
@@ -90,5 +94,15 @@ class SupportTicketController extends Controller
         }
 
         return back()->with('status', 'Message sent.');
+    }
+
+    public function downloadAttachment(SupportMessage $message)
+    {
+        $customer = request()->user()->customer;
+
+        abort_if($message->ticket->customer_id !== $customer?->id, 403);
+        abort_unless($message->attachment_path, 404);
+
+        return Storage::disk('local')->download($message->attachment_path);
     }
 }

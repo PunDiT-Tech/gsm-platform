@@ -30,6 +30,10 @@ class ServiceController extends Controller
     {
         $data = $this->validateData($request);
 
+        if ($request->hasFile('image')) {
+            $data['image'] = \App\Helpers\ImageOptimizer::store('service-images', $request->file('image'));
+        }
+
         $service = Service::create($data);
         \App\Helpers\AuditLogger::log('service.create', $service);
 
@@ -38,7 +42,7 @@ class ServiceController extends Controller
 
     public function edit(Service $service): View
     {
-        $service->load(['activeFields.options', 'informationBlocks', 'links', 'images']);
+        $service->load(['fields.options', 'informationBlocks', 'links', 'images']);
         $categories = ServiceCategory::orderBy('sort_order')->get();
 
         return view('admin.services.edit', compact('service', 'categories'));
@@ -47,6 +51,18 @@ class ServiceController extends Controller
     public function update(Request $request, Service $service): RedirectResponse
     {
         $data = $this->validateData($request, $service->id);
+
+        if ($request->hasFile('image')) {
+            if ($service->image) {
+                \Illuminate\Support\Facades\Storage::disk('local')->delete($service->image);
+            }
+            $data['image'] = \App\Helpers\ImageOptimizer::store('service-images', $request->file('image'));
+        } elseif ($request->boolean('remove_image')) {
+            if ($service->image) {
+                \Illuminate\Support\Facades\Storage::disk('local')->delete($service->image);
+            }
+            $data['image'] = null;
+        }
 
         \App\Helpers\AuditLogger::log('service.update', $service, $service->toArray(), $data);
         $service->update($data);
@@ -99,6 +115,7 @@ class ServiceController extends Controller
             'customer_instructions' => ['nullable', 'string'],
             'admin_internal_notes' => ['nullable', 'string'],
             'consent_required' => ['boolean'],
+            'image' => ['nullable', 'file', 'max:5120', 'mimes:jpg,jpeg,png,webp'],
         ]);
 
         $data['slug'] = $data['slug'] ?: Str::slug($data['name']);

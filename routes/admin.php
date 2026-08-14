@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\FaqController;
 use App\Http\Controllers\Admin\HomepageController;
+use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\ReportController;
@@ -22,6 +23,11 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin')->middleware(['auth', 'verified', 'role:SUPER_ADMIN,ADMIN,SUPPORT,FINANCE'])->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('admin.dashboard');
+
+    // Notifications
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('admin.notifications.index');
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markRead'])->name('admin.notifications.read');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('admin.notifications.readAll');
 
     // Categories
     Route::get('/categories', [CategoryController::class, 'index'])->middleware('permission:services.view')->name('admin.categories.index');
@@ -44,10 +50,16 @@ Route::prefix('admin')->middleware(['auth', 'verified', 'role:SUPER_ADMIN,ADMIN,
 
     // Service content
     Route::post('/services/{service}/fields', [ServiceContentController::class, 'storeField'])->middleware('permission:services.edit')->name('admin.services.fields.store');
+    Route::put('/services/{service}/fields/{field}', [ServiceContentController::class, 'updateField'])->middleware('permission:services.edit')->name('admin.services.fields.update');
+    Route::post('/services/{service}/fields/{field}/toggle', [ServiceContentController::class, 'toggleField'])->middleware('permission:services.edit')->name('admin.services.fields.toggle');
     Route::delete('/services/{service}/fields/{field}', [ServiceContentController::class, 'destroyField'])->middleware('permission:services.edit')->name('admin.services.fields.destroy');
     Route::post('/services/{service}/blocks', [ServiceContentController::class, 'storeBlock'])->middleware('permission:services.edit')->name('admin.services.blocks.store');
+    Route::put('/services/{service}/blocks/{block}', [ServiceContentController::class, 'updateBlock'])->middleware('permission:services.edit')->name('admin.services.blocks.update');
+    Route::post('/services/{service}/blocks/{block}/toggle', [ServiceContentController::class, 'toggleBlock'])->middleware('permission:services.edit')->name('admin.services.blocks.toggle');
     Route::delete('/services/{service}/blocks/{block}', [ServiceContentController::class, 'destroyBlock'])->middleware('permission:services.edit')->name('admin.services.blocks.destroy');
     Route::post('/services/{service}/links', [ServiceContentController::class, 'storeLink'])->middleware('permission:services.edit')->name('admin.services.links.store');
+    Route::put('/services/{service}/links/{link}', [ServiceContentController::class, 'updateLink'])->middleware('permission:services.edit')->name('admin.services.links.update');
+    Route::post('/services/{service}/links/{link}/toggle', [ServiceContentController::class, 'toggleLink'])->middleware('permission:services.edit')->name('admin.services.links.toggle');
     Route::delete('/services/{service}/links/{link}', [ServiceContentController::class, 'destroyLink'])->middleware('permission:services.edit')->name('admin.services.links.destroy');
 
     // Orders
@@ -63,21 +75,26 @@ Route::prefix('admin')->middleware(['auth', 'verified', 'role:SUPER_ADMIN,ADMIN,
     Route::get('/payments', [PaymentController::class, 'index'])->middleware('permission:payments.view')->name('admin.payments.index');
     Route::post('/payments/{payment}/verify', [PaymentController::class, 'verify'])->middleware('permission:payments.verify')->name('admin.payments.verify');
     Route::post('/payments/{payment}/reject', [PaymentController::class, 'reject'])->middleware('permission:payments.reject')->name('admin.payments.reject');
+    Route::post('/payments/{payment}/refund', [PaymentController::class, 'refund'])->middleware('permission:payments.refund')->name('admin.payments.refund');
     Route::get('/payments/proof/{proof}/download', [PaymentController::class, 'downloadProof'])->middleware('permission:payments.view')->name('admin.payments.proof-download');
 
     // Customers
     Route::get('/customers', [CustomerController::class, 'index'])->middleware('permission:customers.view')->name('admin.customers.index');
     Route::get('/customers/{customer}', [CustomerController::class, 'show'])->middleware('permission:customers.view')->name('admin.customers.show');
+    Route::post('/customers/{customer}/suspend', [CustomerController::class, 'suspend'])->middleware('permission:customers.manage')->name('admin.customers.suspend');
 
     // Support
     Route::get('/support', [SupportController::class, 'index'])->middleware('permission:support.view')->name('admin.support.index');
     Route::get('/support/{ticket}', [SupportController::class, 'show'])->middleware('permission:support.view')->name('admin.support.show');
     Route::post('/support/{ticket}/reply', [SupportController::class, 'reply'])->middleware('permission:support.manage')->name('admin.support.reply');
+    Route::post('/support/{ticket}/assign', [SupportController::class, 'assign'])->middleware('permission:support.manage')->name('admin.support.assign');
     Route::post('/support/{ticket}/status', [SupportController::class, 'status'])->middleware('permission:support.manage')->name('admin.support.status');
+    Route::get('/support/message/{message}/download', [SupportController::class, 'downloadAttachment'])->middleware('permission:support.view')->name('admin.support.attachment-download');
 
     // Homepage
     Route::get('/homepage', [HomepageController::class, 'index'])->middleware('permission:homepage.manage')->name('admin.homepage.index');
     Route::post('/homepage', [HomepageController::class, 'storeShowcase'])->middleware('permission:homepage.manage')->name('admin.homepage.store');
+    Route::post('/homepage/content', [HomepageController::class, 'updateContent'])->middleware('permission:homepage.manage')->name('admin.homepage.content');
     Route::put('/homepage/{showcase}', [HomepageController::class, 'updateShowcase'])->middleware('permission:homepage.manage')->name('admin.homepage.update');
     Route::delete('/homepage/{showcase}', [HomepageController::class, 'destroyShowcase'])->middleware('permission:homepage.manage')->name('admin.homepage.destroy');
 

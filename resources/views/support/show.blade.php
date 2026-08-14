@@ -23,6 +23,9 @@
                 <div class="text-sm p-3 rounded-md {{ $message->user_id ? 'bg-blue-50 border border-blue-200' : 'bg-gray-50' }}">
                     <p class="font-medium">{{ $message->user?->name ?? 'You' }} <span class="text-gray-400 font-normal">· {{ $message->created_at->format('M d, H:i') }}</span></p>
                     <p class="mt-0.5 text-gray-700 whitespace-pre-wrap">{{ $message->message }}</p>
+                    @if ($message->attachment_path)
+                        <a href="{{ route('support.attachment-download', $message) }}" class="mt-1 inline-flex items-center text-xs text-blue-600 hover:underline">📎 Download attachment</a>
+                    @endif
                 </div>
             @empty
                 <p class="text-sm text-gray-500">No messages.</p>

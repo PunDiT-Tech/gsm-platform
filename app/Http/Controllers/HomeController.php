@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Announcement;
 use App\Models\Faq;
+use App\Models\HomepageSection;
 use App\Models\HomepageShowcase;
 use App\Models\Service;
 use App\Models\ServiceCategory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class HomeController extends Controller
@@ -19,8 +22,9 @@ class HomeController extends Controller
         $featuredServices = Service::public()->where('is_featured', true)->with('category')->limit(8)->get();
         $categories = ServiceCategory::where('is_active', true)->withCount('services')->orderBy('sort_order')->limit(8)->get();
         $faqs = Faq::where('is_active', true)->orderBy('sort_order')->limit(6)->get();
+        $sections = HomepageSection::where('is_active', true)->get()->keyBy('key');
 
-        return view('home', compact('showcases', 'announcements', 'featuredServices', 'categories', 'faqs'));
+        return view('home', compact('showcases', 'announcements', 'featuredServices', 'categories', 'faqs', 'sections'));
     }
 
     public function services(Request $request): View
@@ -81,5 +85,18 @@ class HomeController extends Controller
         abort_unless(in_array($slug, $allowed, true), 404);
 
         return view("pages.{$slug}");
+    }
+
+    public function showcaseImage(HomepageShowcase $showcase, string $variant)
+    {
+        abort_unless(in_array($variant, ['image', 'desktop_image', 'mobile_image'], true), 404);
+
+        $path = $showcase->{$variant};
+        abort_if(! $path, 404);
+
+        $disk = Storage::disk('local');
+        abort_unless($disk->exists($path), 404);
+
+        return $disk->response($path);
     }
 }
