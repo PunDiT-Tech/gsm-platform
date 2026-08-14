@@ -19,6 +19,16 @@
         </div>
     @endif
 
+    @if (auth()->user()->isStaff())
+        <div class="mb-6 bg-white border border-gray-200 rounded-lg p-6 max-w-lg flex items-center justify-between">
+            <div>
+                <h3 class="font-semibold text-gray-900">Two-factor authentication</h3>
+                <p class="text-sm text-gray-500">Add an extra security layer to your staff account.</p>
+            </div>
+            <a href="{{ route('profile.two-factor') }}" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm font-medium">Manage</a>
+        </div>
+    @endif
+
     <form method="POST" action="{{ route('profile.password') }}" class="bg-white border border-gray-200 rounded-lg p-6 space-y-4 max-w-lg">
         @csrf
         @method('PATCH')

@@ -14,6 +14,9 @@ Common issues during installation and operation, with root-cause fixes (not work
 | Symptom | Cause | Fix |
 |---|---|---|
 | Login redirects back with error | Wrong creds or account suspended | Check `is_active`; reset password via reset flow |
+| Staff prompted for 2FA code unexpectedly | 2FA enabled for that account | Enter the current code from the authenticator app; if no device, disable 2FA via DB (`two_factor_secret=NULL`, `two_factor_confirmed_at=NULL`) or use a recovery code |
+| 2FA code rejected | Clock skew / wrong secret | Ensure device time is synced (TOTP window ±30 s); re-run setup from `/profile/two-factor` |
+| Lost authenticator device + all recovery codes | No fallback | Admin must clear the user's 2FA fields in DB; consider enforcing recovery-code storage |
 | Admin routes 403 | Missing role/permission | Assign role via seeder or staff management; see PERMISSION-MATRIX.md |
 | Session expires quickly | DB session + local timezone | `SESSION_LIFETIME`; inspect session table writes |
 | 419 on form submission | CSRF token/session mismatch | Regenerate `APP_KEY` only once; clear browser cookies; check `SESSION_SECURE_COOKIE` vs HTTP/HTTPS |

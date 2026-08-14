@@ -5,7 +5,7 @@ Review against the code-quality stage of the master spec.
 ## Checks performed
 | Check | Result | Notes |
 |---|---|---|
-| Duplicate code | PASS | Shared logic extracted into service classes (`OrderService`, `CouponService`, `NotificationService`) |
+| Duplicate code | PASS | Shared logic extracted into service classes (`OrderService`, `CouponService`, `NotificationService`, `TwoFactorService`, `QrCodeGenerator`) |
 | Dead code | PASS | No unused controllers/models/views found; all routes registered |
 | Unused dependencies | PASS | Dependencies audited via Composer; no unnecessary packages shipped |
 | Large controllers | PASS | Order flow, coupons, payments, and notifications factored into service layer |

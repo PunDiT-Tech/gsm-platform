@@ -47,6 +47,9 @@ Route::middleware('guest')->group(function () {
     Route::get('login', [AuthenticatedSessionController::class, 'create'])->name('login');
     Route::post('login', [AuthenticatedSessionController::class, 'store'])->middleware('throttle:auth');
 
+    Route::get('two-factor-challenge', [\App\Http\Controllers\Auth\TwoFactorChallengeController::class, 'create'])->name('two-factor.challenge');
+    Route::post('two-factor-challenge', [\App\Http\Controllers\Auth\TwoFactorChallengeController::class, 'store'])->middleware('throttle:two-factor')->name('two-factor.challenge.store');
+
     Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])->name('password.request');
     Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])->middleware('throttle:password')->name('password.email');
 
@@ -83,4 +86,9 @@ Route::middleware('auth')->group(function () {
     Route::patch('profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::get('profile/security', [ProfileController::class, 'security'])->name('profile.security');
     Route::patch('profile/password', [ProfileController::class, 'password'])->name('profile.password');
+
+    Route::get('profile/two-factor', [\App\Http\Controllers\TwoFactorController::class, 'show'])->name('profile.two-factor');
+    Route::post('profile/two-factor/enable', [\App\Http\Controllers\TwoFactorController::class, 'enable'])->name('profile.two-factor.enable');
+    Route::post('profile/two-factor/confirm', [\App\Http\Controllers\TwoFactorController::class, 'confirm'])->name('profile.two-factor.confirm');
+    Route::post('profile/two-factor/disable', [\App\Http\Controllers\TwoFactorController::class, 'disable'])->name('profile.two-factor.disable');
 });

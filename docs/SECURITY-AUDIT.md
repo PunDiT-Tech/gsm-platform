@@ -12,6 +12,7 @@ Status: automated review of the implemented application. Severities: CRITICAL / 
 | Brute force protection | PASS | `throttle:auth` (5/min) on login/register |
 | Session fixation | PASS | `$request->session()->regenerate()` |
 | Suspended accounts | PASS | `is_active` checked at login |
+| Two-factor authentication | PASS | TOTP (RFC 6238) challenge step for all staff; secrets encrypted at rest; recovery codes single-use |
 
 ## Authorization
 | Check | Result | Notes |
@@ -51,8 +52,7 @@ Status: automated review of the implemented application. Severities: CRITICAL / 
 
 ## Findings & recommendations
 1. [LOW] Enable `SESSION_SECURE_COOKIE=true` and `SESSION_ENCRYPT=true` in production `.env`.
-2. [LOW] Enable 2FA for SUPER_ADMIN accounts before public launch (planned enhancement).
-3. [LOW] Add Content-Security-Policy header in production Nginx.
-4. [INFORMATIONAL] Redis recommended for sessions/queues/cache in production for scale.
+2. [LOW] Add Content-Security-Policy header in production Nginx.
+3. [INFORMATIONAL] Redis recommended for sessions/queues/cache in production for scale.
 
 No CRITICAL or HIGH findings in the current implementation. All findings above are LOW/INFORMATIONAL and configuration-level.

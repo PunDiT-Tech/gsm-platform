@@ -6,6 +6,7 @@ Status of each major feature.
 |---|---|---|
 | Registration | PASS | Email verification, phone validation, terms acceptance |
 | Login / Logout | PASS | Rate limited, session regeneration |
+| Two-factor authentication | PASS | TOTP challenge for all staff, recovery codes, admin setup |
 | Email verification | PASS | Signed URL, resend |
 | Password reset | PASS | Expiring tokens, generic response |
 | Customer dashboard | PASS | Overview, orders, profile, security, notifications, support |

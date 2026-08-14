@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\AdminActivityLog;
+use App\Services\TwoFactorService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -12,6 +13,10 @@ use Illuminate\View\View;
 
 class AuthenticatedSessionController extends Controller
 {
+    public function __construct(private readonly TwoFactorService $twoFactor)
+    {
+    }
+
     public function create(): View
     {
         return view('auth.login');
@@ -38,6 +43,16 @@ class AuthenticatedSessionController extends Controller
             throw ValidationException::withMessages([
                 'email' => 'Your account has been suspended. Please contact support.',
             ]);
+        }
+
+        if ($user->isStaff() && $this->twoFactor->isEnabled($user)) {
+            Auth::logout();
+
+            $request->session()->put('login.id', $user->id);
+            $request->session()->put('login.remember', $request->boolean('remember'));
+            $request->session()->regenerateToken();
+
+            return redirect()->route('two-factor.challenge');
         }
 
         $request->session()->regenerate();
