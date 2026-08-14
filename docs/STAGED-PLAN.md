@@ -1,6 +1,6 @@
 # Staged Implementation Plan
 
-Follows the master spec (docs/B-spec). Build one stage at a time; each stage ends with:
+Follows the master spec (kept externally as `B.txt` alongside this repository). Build one stage at a time; each stage ends with:
 tests run, security checks, and an internal report before proceeding.
 
 | Stage | Focus |
