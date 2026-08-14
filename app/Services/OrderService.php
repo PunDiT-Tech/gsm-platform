@@ -34,6 +34,8 @@ class OrderService
             throw ValidationException::withMessages(['consent' => 'You must confirm that you are authorized to request this service.']);
         }
 
+        $this->guardDuplicateSubmission($service, $data['fields'] ?? [], $user, $data);
+
         $customer = $this->resolveCustomer($data, $user);
 
         $price = $service->service_type === 'FREE' ? 0 : (float) $service->price;
@@ -184,6 +186,41 @@ class OrderService
         }
 
         return $value;
+    }
+
+    protected function guardDuplicateSubmission(Service $service, array $fields, ?\Illuminate\Contracts\Auth\Authenticatable $user, array $data): void
+    {
+        $identifier = null;
+
+        foreach ($service->activeFields as $field) {
+            if (in_array($field->type, ['IMEI', 'SERIAL_NUMBER'])) {
+                $identifier = $fields[$field->id] ?? null;
+                break;
+            }
+        }
+
+        if (! $identifier) {
+            return;
+        }
+
+        $email = $data['customer_email'] ?? $user?->email;
+
+        if (! $email) {
+            return;
+        }
+
+        $recent = Order::where('customer_email', $email)
+            ->where('service_id', $service->id)
+            ->whereIn('status', ['PENDING', 'PROCESSING', 'WAITING_FOR_CUSTOMER'])
+            ->where('created_at', '>', now()->subMinutes(10))
+            ->whereHas('fieldValues', fn ($q) => $q->where('value', $identifier))
+            ->exists();
+
+        if ($recent) {
+            throw ValidationException::withMessages([
+                'fields' => 'An order for this device is already in progress. Please check your existing order instead of submitting a duplicate.',
+            ]);
+        }
     }
 
     protected function resolveCustomer(array $data, ?\Illuminate\Contracts\Auth\Authenticatable $user): Customer

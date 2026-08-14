@@ -26,7 +26,13 @@ class MyOrdersController extends Controller
     {
         abort_if($order->customer->user_id !== request()->user()->id, 403);
 
-        $order->load(['statusHistory', 'messages.user', 'results', 'payments.method']);
+        $order->load([
+            'statusHistory',
+            'messages' => fn ($q) => $q->where('type', '!=', 'INTERNAL'),
+            'results',
+            'payments.method',
+            'fieldValues',
+        ]);
 
         return view('orders.show', compact('order'));
     }

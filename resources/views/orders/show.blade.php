@@ -37,6 +37,22 @@
         </div>
     </div>
 
+    <div class="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+        <h3 class="font-semibold text-gray-900 mb-4">Submitted details</h3>
+        @if ($order->fieldValues->isEmpty())
+            <p class="text-sm text-gray-500">No details submitted.</p>
+        @else
+            <dl class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                @foreach ($order->fieldValues as $value)
+                    <div>
+                        <dt class="text-gray-500">{{ $value->label }}</dt>
+                        <dd class="font-medium break-all">{{ $value->value ?: '—' }}</dd>
+                    </div>
+                @endforeach
+            </dl>
+        @endif
+    </div>
+
     @if ($order->status === 'WAITING_FOR_CUSTOMER')
         <div class="bg-amber-50 border border-amber-200 text-amber-800 rounded-lg p-4 mb-6">
             <strong>Action required:</strong> The support team has requested additional information. Please reply below or upload the requested files.
