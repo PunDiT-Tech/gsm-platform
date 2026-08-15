@@ -75,3 +75,4 @@ php artisan test
 - Require two-factor authentication for every staff account before granting production access (see `/profile/two-factor`).
 - Enable HTTPS, queue workers (Supervisor), and the scheduler (Cron) in production.
 "# gsm-platform" 
+"# gsm-platform" 
