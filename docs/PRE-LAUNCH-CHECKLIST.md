@@ -1,6 +1,6 @@
 # Pre-launch Checklist
 
-Run top-to-bottom before going live. Each item has the command or file to use. Full details in `DEPLOYMENT.md` and `NOVICE-DEPLOYMENT-GUIDE.md`.
+Run top-to-bottom before going live. Each item has the command or file to use. Full details in `DEPLOYMENT.md` and `NOVICE-DEPLOYMENT-GUIDE.md`. Prefer the copy-paste walkthrough in `GO-LIVE-NOVICE.md` if this is a first launch.
 
 ## 1. Server
 - [ ] Ubuntu server provisioned, `apt update` run.

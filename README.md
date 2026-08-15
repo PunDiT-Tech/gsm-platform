@@ -66,6 +66,7 @@ php artisan test
 - `docs/CODE-QUALITY-AUDIT.md`
 - `docs/SPEC-COMPLIANCE-AUDIT.md`
 - `docs/NOVICE-DEPLOYMENT-GUIDE.md`
+- `docs/GO-LIVE-NOVICE.md`
 
 ## Security notes
 
