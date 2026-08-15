@@ -126,7 +126,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                     @endif
                                     @php $href = $showcase->link_type === 'service' && $showcase->service ? route('services.show', $showcase->service->slug) : ($showcase->link_type === 'url' ? $showcase->link_url : route('services.index')); @endphp
                                     <a href="{{ $href }}"
-                                       class="inline-block mt-8 bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-md">Explore services</a>
+                                       class="inline-block mt-8 bg-accent-600 hover:bg-accent-500 text-white font-medium px-6 py-3 rounded-md">Explore services</a>
                                 </div>
                             </div>
                         @else
@@ -137,7 +137,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 @endif
                                 @php $href = $showcase->link_type === 'service' && $showcase->service ? route('services.show', $showcase->service->slug) : ($showcase->link_type === 'url' ? $showcase->link_url : route('services.index')); @endphp
                                 <a href="{{ $href }}"
-                                   class="inline-block mt-8 bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-md">Explore services</a>
+                                   class="inline-block mt-8 bg-accent-600 hover:bg-accent-500 text-white font-medium px-6 py-3 rounded-md">Explore services</a>
                             </div>
                         @endif
                     </div>
@@ -154,7 +154,7 @@ document.addEventListener('DOMContentLoaded', function () {
             <div class="max-w-7xl mx-auto px-4 sm:px-6 py-20 md:py-28 text-center">
                 <h1 class="text-4xl md:text-5xl font-bold leading-tight">{{ $sections['hero']->title ?? 'Professional Device Services' }}</h1>
                 <p class="mt-4 text-lg text-gray-300 max-w-2xl mx-auto">{{ $sections['hero']->content ?? 'Reliable GSM repair, diagnostics and maintenance services with secure order tracking.' }}</p>
-                <a href="{{ route('services.index') }}" class="inline-block mt-8 bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-md">Explore services</a>
+                <a href="{{ route('services.index') }}" class="inline-block mt-8 bg-accent-600 hover:bg-accent-500 text-white font-medium px-6 py-3 rounded-md">Explore services</a>
             </div>
         </section>
     @endif

@@ -11,7 +11,7 @@
 </head>
 <body class="font-sans antialiased bg-gray-100">
     <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 px-4">
-        <a href="/" class="text-2xl font-bold text-blue-600 mb-6">{{ config('app.name') }}</a>
+        <a href="/" class="text-2xl font-bold text-blue-600 mb-6">{{ config('app.name') }}<span class="text-accent-600">.</span></a>
 
         @if (session('status'))
             <div class="w-full max-w-md mb-4 bg-green-50 border border-green-200 text-green-800 text-sm px-4 py-3 rounded-md">{{ session('status') }}</div>

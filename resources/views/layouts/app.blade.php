@@ -21,7 +21,7 @@
     <div class="min-h-screen flex flex-col">
         <header class="bg-white border-b border-gray-200 sticky top-0 z-40">
             <nav class="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
-                <a href="/" class="text-xl font-bold text-blue-600">{{ config('app.name') }}</a>
+                <a href="/" class="text-xl font-bold text-blue-600">{{ config('app.name') }}<span class="text-accent-600">.</span></a>
                 <div class="flex items-center gap-4 text-sm">
                     @auth
                         <a href="{{ route('dashboard') }}" class="text-gray-700 hover:text-blue-600">Dashboard</a>

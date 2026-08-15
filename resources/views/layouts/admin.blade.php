@@ -13,7 +13,7 @@
 <body class="font-sans antialiased bg-gray-100 text-gray-900">
     <div class="flex min-h-screen">
         <aside class="w-60 bg-gray-900 text-gray-300 shrink-0 hidden lg:block">
-            <div class="px-5 py-5 text-white font-bold text-lg border-b border-gray-800">{{ config('app.name') }} <span class="text-blue-400 text-xs align-top">Admin</span></div>
+            <div class="px-5 py-5 text-white font-bold text-lg border-b border-gray-800">{{ config('app.name') }} <span class="text-accent-400 text-xs align-top">Admin</span></div>
             <nav class="p-3 space-y-0.5 text-sm">
                     @php
                         $items = [
