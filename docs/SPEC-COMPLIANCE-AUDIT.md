@@ -1,6 +1,6 @@
 # Spec Compliance Audit Report
 
-Audit date: 2026-08-15. Result of a full comparison of the running application against the master spec (`B.txt`, Stage 0 - Stage 69). Findings marked `FIXED` were remediated on 2026-08-15 (round 2: refund admin flow, checkout payment-method display/selection, order review step, service/showcase images, field/block/link edit+toggle UI, message read flags, SEO canonical/Twitter meta; round 3: support assign/attachment/read status, homepage CMS content, payment-proof email, FAQ on services, customer suspend, admin notifications, WebP optimization, API + external_id; round 4: production hardening probes, homepage animation types + direction-aware swipe, per-service payment-method override, customer unread-message badge).
+Audit date: 2026-08-15. Result of a full comparison of the running application against the master spec (`B.txt`, Stage 0 - Stage 69). Findings marked `FIXED` were remediated on 2026-08-15 (round 2: refund admin flow, checkout payment-method display/selection, order review step, service/showcase images, field/block/link edit+toggle UI, message read flags, SEO canonical/Twitter meta; round 3: support assign/attachment/read status, homepage CMS content, payment-proof email, FAQ on services, customer suspend, admin notifications, WebP optimization, API + external_id; round 4: production hardening probes, homepage animation types + direction-aware swipe, per-service payment-method override, customer unread-message badge; round 5: staff logout audit, composite indexes, on-the-fly image resize/WebP, nginx + env production templates).
 
 Legend: PASS = spec met; PARTIAL = partially met; FAIL/OPEN = not met. Severity: CRITICAL / HIGH / MEDIUM / LOW.
 
@@ -93,20 +93,20 @@ Legend: PASS = spec met; PARTIAL = partially met; FAIL/OPEN = not met. Severity:
 | Legal pages | PASS | 4 pages; content is static (not admin-edited) |
 | Reports | PASS | Orders/revenue/service/method/date-range aggregates |
 | System health | FIXED | All checkers present; mail/telegram now live probes (transport connect / `getMe`); app_debug + secure_cookie hardening checks added |
-| Audit logging | FIXED-EXPANDED | Services/categories/orders/payments + now staff/settings/telegram/coupons/announcements/FAQ/showcase/toggle/feature |
+| Audit logging | FIXED-EXPANDED | Services/categories/orders/payments + now staff/settings/telegram/coupons/announcements/FAQ/showcase/toggle/feature; staff logout now audited |
 | API-readiness | FIXED | `api.php` with Bearer-token auth (`api.auth`), services + order-lookup endpoints, API key setting, `external_id` on services/orders |
-| Performance | FIXED-EXPANDED | Homepage N+1 fixed; reports already aggregates; missing `orders.created_at` index |
+| Performance | FIXED-EXPANDED | Homepage N+1 fixed; reports already aggregates; composite indexes added (`orders(status,payment_status)`, `orders(status,created_at)`, `orders(created_at)`, `payments(order_id,status)`, `payments(created_at)`); on-the-fly WebP resize with disk cache |
 | Transactions everywhere | FIXED-EXPANDED | Proof upload, expiry, order status history now transactional |
 | Error pages 403/404/419/429/500/503 | PASS | All present, no stack traces in views |
 | Rate limiting all listed actions | FIXED | Order file upload now throttled like the rest |
-| Docs deliverable | PASS | README + INSTALLATION + DEPLOYMENT + SECURITY-AUDIT + FUNCTIONALITY-AUDIT + SCALABILITY-AUDIT + BACKUP/RESTORE + TROUBLESHOOTING + PERFORMANCE + CODE-QUALITY + per-spec audit docs |
+| Docs deliverable | PASS | README + INSTALLATION + DEPLOYMENT + SECURITY-AUDIT + FUNCTIONALITY-AUDIT + SCALABILITY-AUDIT + BACKUP/RESTORE + TROUBLESHOOTING + PERFORMANCE + CODE-QUALITY + per-spec audit docs + `deploy/nginx-gsm-platform.conf` + `.env.production.example` |
 
 ## Remaining known gaps (highest first)
-- None blocking. Production deployment must set `APP_DEBUG=false` + `SESSION_SECURE_COOKIE=true` in `.env` (now enforced by health probes).
+- None blocking. Production deployment must set `APP_DEBUG=false` + `SESSION_SECURE_COOKIE=true` in `.env` (now enforced by health probes; hardened defaults in `.env.production.example`).
 
 ## Verification performed after fixes
-- `php artisan test` -> 108 passed / 288 assertions.
+- `php artisan test` -> 112 passed / 303 assertions.
 - `php -l` across app, database, routes, tests -> all clean.
 - `npx vite build` -> success.
-- `migrate` -> applied to dev DB (payment_method_id on services).
+- `migrate` -> applied to dev DB (payment_method_id on services, composite indexes).
 - `migrate:fresh --seed` -> 1 admin, 4 roles, 27 permissions, 3 payment methods, 3 services.

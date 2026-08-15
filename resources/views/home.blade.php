@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     <div class="min-w-full showcase-slide" data-animation="{{ $showcase->animation ?? 'NONE' }}">
                         @if ($showcase->desktop_image || $showcase->image)
                             <div class="relative h-[420px] md:h-[520px]">
-                                <img src="{{ route('showcase.image', [$showcase, $showcase->desktop_image ? 'desktop_image' : 'image']) }}" alt="{{ $showcase->title ?? 'Showcase' }}" class="w-full h-full object-cover">
+                                <img src="{{ route('showcase.image', [$showcase, $showcase->desktop_image ? 'desktop_image' : 'image']) }}?w=1920" alt="{{ $showcase->title ?? 'Showcase' }}" class="w-full h-full object-cover">
                                 <div class="absolute inset-0 bg-black/40"></div>
                                 <div class="showcase-content relative max-w-7xl mx-auto px-4 sm:px-6 py-20 md:py-28 text-center text-white">
                                     <h1 class="text-4xl md:text-5xl font-bold leading-tight">{{ $showcase->title ?? 'Professional Device Services' }}</h1>
@@ -199,7 +199,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     <a href="{{ route('services.show', $service->slug) }}"
                        class="bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-blue-400 hover:shadow-sm transition flex flex-col">
                         @if ($service->image)
-                            <img src="{{ route('services.image', $service) }}" alt="{{ $service->name }}" class="w-full h-36 object-cover">
+                            <img src="{{ route('services.image', $service) }}?w=480" alt="{{ $service->name }}" class="w-full h-36 object-cover">
                         @endif
                         <div class="p-5 flex flex-col flex-1">
                             <div class="flex items-center justify-between mb-3">

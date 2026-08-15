@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Announcement;
 use App\Models\Faq;
 use App\Models\Service;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class ServiceController extends Controller
@@ -23,13 +23,13 @@ class ServiceController extends Controller
         return view('catalog.show', compact('service', 'announcements', 'faqs'));
     }
 
-    public function image(Service $service)
+    public function image(Request $request, Service $service)
     {
         abort_if(! $service->image, 404);
 
-        $disk = Storage::disk('local');
-        abort_unless($disk->exists($service->image), 404);
+        $width = $request->integer('w') ?: null;
+        $height = $request->integer('h') ?: null;
 
-        return $disk->response($service->image);
+        return \App\Helpers\ImageOptimizer::serve('local', $service->image, $width, $height);
     }
 }

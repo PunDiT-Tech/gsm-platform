@@ -17,9 +17,11 @@ git clone <repo> gsm-platform
 cd gsm-platform
 composer install --no-dev --optimize-autoloader
 npm ci && npm run build
-cp .env.example .env
+cp .env.production.example .env
 php artisan key:generate
 ```
+
+> Production env defaults are hardened in `.env.production.example`: `APP_DEBUG=false`, `SESSION_SECURE_COOKIE=true`, `SESSION_ENCRYPT=true`, `LOG_LEVEL=warning`, SMTP mail. Fill in DB credentials, `APP_URL` (https), mail, and Telegram values before deploying.
 
 ## 3. Database
 
@@ -78,7 +80,16 @@ crontab -e
 
 ## 7. Nginx site
 
-`/etc/nginx/sites-available/gsm-platform`:
+A production-ready template (HTTPS redirect, security headers, asset/image caching) ships in the repo:
+
+```bash
+cp deploy/nginx-gsm-platform.conf /etc/nginx/sites-available/gsm-platform
+# edit server_name, root path, ssl_certificate paths, and PHP-FPM socket to match your server
+ln -s /etc/nginx/sites-available/gsm-platform /etc/nginx/sites-enabled/
+nginx -t && systemctl reload nginx
+```
+
+Minimal HTTP-only version (development):
 
 ```nginx
 server {
@@ -111,11 +122,6 @@ server {
         deny all;
     }
 }
-```
-
-```bash
-ln -s /etc/nginx/sites-available/gsm-platform /etc/nginx/sites-enabled/
-nginx -t && systemctl reload nginx
 ```
 
 ## 8. HTTPS (Let's Encrypt)

@@ -7,8 +7,8 @@
 <meta property="og:title" content="{{ $service->name }}">
 <meta property="og:description" content="{{ Str::limit($service->short_description, 160) }}">
 @if ($service->image)
-<meta property="og:image" content="{{ route('services.image', $service) }}">
-<meta name="twitter:image" content="{{ route('services.image', $service) }}">
+<meta property="og:image" content="{{ route('services.image', $service) }}?w=1200">
+<meta name="twitter:image" content="{{ route('services.image', $service) }}?w=1200">
 @endif
 @endpush
 
@@ -39,7 +39,7 @@
 
                 <div class="flex items-center gap-4 mb-4">
                     @if ($service->image)
-                        <img src="{{ route('services.image', $service) }}" alt="{{ $service->name }}" class="w-20 h-20 object-cover rounded-lg border border-gray-200">
+                        <img src="{{ route('services.image', $service) }}?w=160" alt="{{ $service->name }}" class="w-20 h-20 object-cover rounded-lg border border-gray-200">
                     @else
                         <span class="text-5xl">{{ $service->icon ?? '🔧' }}</span>
                     @endif

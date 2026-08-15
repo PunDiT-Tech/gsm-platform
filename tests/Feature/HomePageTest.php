@@ -8,6 +8,7 @@ use App\Models\HomepageShowcase;
 use App\Models\Service;
 use App\Models\ServiceCategory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class HomePageTest extends TestCase
@@ -96,6 +97,37 @@ class HomePageTest extends TestCase
         \App\Models\Faq::create(['question' => 'How long?', 'answer' => 'A day', 'sort_order' => 1, 'is_active' => true]);
 
         $this->get(route('services.show', 'screen-repair'))->assertOk()->assertSee('How long?');
+    }
+
+    public function test_service_image_serves_with_resize_params(): void
+    {
+        Storage::fake('local');
+        $png = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==');
+
+        $category = ServiceCategory::create(['name' => 'Repair', 'slug' => 'repair', 'is_active' => true, 'sort_order' => 1]);
+        $service = Service::create([
+            'category_id' => $category->id,
+            'name' => 'Screen Repair',
+            'slug' => 'screen-repair',
+            'price' => 25,
+            'currency' => 'USD',
+            'service_type' => 'PAID',
+            'is_active' => true,
+            'image' => 'service-images/test.png',
+        ]);
+        Storage::disk('local')->put('service-images/test.png', $png);
+
+        $this->get(route('services.image', $service) . '?w=100&h=100')
+            ->assertOk()
+            ->assertHeader('Content-Type', 'image/png');
+        $this->assertTrue(Storage::disk('local')->exists('service-images/test.png'));
+    }
+
+    public function test_showcase_image_route_rejects_unknown_variant(): void
+    {
+        $showcase = HomepageShowcase::create(['title' => 'Slide', 'sort_order' => 1, 'is_active' => true]);
+
+        $this->get(route('showcase.image', [$showcase, 'evil']))->assertNotFound();
     }
 
     public function test_admin_can_update_homepage_content(): void

@@ -25,7 +25,7 @@
                     <a href="{{ route('services.show', $service->slug) }}"
                        class="bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-blue-400 hover:shadow-sm transition flex flex-col">
                         @if ($service->image)
-                            <img src="{{ route('services.image', $service) }}" alt="{{ $service->name }}" class="w-full h-44 object-cover">
+                            <img src="{{ route('services.image', $service) }}?w=480" alt="{{ $service->name }}" class="w-full h-44 object-cover">
                         @endif
                         <div class="p-6 flex flex-col flex-1">
                             <div class="flex items-center justify-between mb-3">

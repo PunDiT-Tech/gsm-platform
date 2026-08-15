@@ -5,7 +5,7 @@ Status of each major feature.
 | Feature | Status | Notes |
 |---|---|---|
 | Registration | PASS | Email verification, phone validation, terms acceptance |
-| Login / Logout | PASS | Rate limited, session regeneration |
+| Login / Logout | PASS | Rate limited, session regeneration; staff login and logout recorded in activity log |
 | Two-factor authentication | PASS | TOTP challenge for all staff, recovery codes, admin setup |
 | Email verification | PASS | Signed URL, resend |
 | Password reset | PASS | Expiring tokens, generic response |
@@ -13,7 +13,7 @@ Status of each major feature.
 | Service catalog | PASS | Categories, active/inactive filter, status badges |
 | Service details | PASS | Info blocks, links, images, dynamic form |
 | Dynamic fields | PASS | 14 field types, server-side validation, regex |
-| Homepage showcase | PASS | Auto-slide, reduced-motion support |
+| Homepage showcase | PASS | Auto-slide, reduced-motion support, per-slide animations, direction-aware swipe |
 | Homepage CMS | PASS | Admin-managed slides |
 | Guest orders | PASS | Name/email/phone, tracking code |
 | Registered orders | PASS | Linked to account |
@@ -35,8 +35,8 @@ Status of each major feature.
 | SEO | PASS | Sitemap, meta tags, clean URLs; canonical + Open Graph/Twitter meta site-wide |
 | Legal pages | PASS | Terms/Privacy/Refunds/Acceptable Use |
 | Reports | PASS | Revenue/orders by service, payment methods, date range |
-| System health | PASS | DB, storage, queue, cache, scheduler, telegram, mail, disk |
-| Audit logging | PARTIAL | Services, categories, orders, payments, staff, settings, telegram, coupons, announcements, FAQ, homepage showcase; logout not yet recorded |
+| System health | PASS | DB, storage, queue, cache, scheduler, telegram (live probe), mail (live probe), disk, app_debug, secure_cookie |
+| Audit logging | PASS | Services, categories, orders, payments, staff (login + logout), settings, telegram, coupons, announcements, FAQ, homepage showcase |
 | Admin users/roles | PASS | Staff CRUD, role/permission display |
 | Settings | PASS | Website + payment method configuration |
 | API-ready | PASS | Clean service layer, external IDs, webhook-ready structure |

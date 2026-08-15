@@ -45,14 +45,14 @@ Status: automated review of the implemented application. Severities: CRITICAL / 
 | Check | Result | Notes |
 |---|---|---|
 | CSRF | PASS | Laravel default on all POST/PUT/DELETE |
-| Secure cookies | PARTIAL | `SESSION_SECURE_COOKIE=true` required in production; enforced via `checkSecureCookie` health probe |
-| HTTPS | PARTIAL | Requires Nginx config (see DEPLOYMENT.md) |
-| Security headers | PARTIAL | X-Frame-Options etc. in Nginx template |
+| Secure cookies | FIXED | `SESSION_SECURE_COOKIE=true` in `.env.production.example`; enforced via `checkSecureCookie` health probe |
+| HTTPS | PARTIAL | Requires Nginx config (see DEPLOYMENT.md + `deploy/nginx-gsm-platform.conf`) |
+| Security headers | FIXED | Full header set in `deploy/nginx-gsm-platform.conf` (X-Frame-Options, nosniff, Referrer-Policy, Permissions-Policy, HSTS, XSS protection) |
 | Secrets in code | PASS | Secrets only via `.env`, `.env` git-ignored |
 
 ## Findings & recommendations
-1. [LOW] Enable `SESSION_SECURE_COOKIE=true` and `SESSION_ENCRYPT=true` in production `.env`.
-2. [LOW] Add Content-Security-Policy header in production Nginx.
+1. [LOW] Enable `SESSION_SECURE_COOKIE=true` and `SESSION_ENCRYPT=true` in production `.env` (already default in `.env.production.example`).
+2. [LOW] Add a Content-Security-Policy header in production Nginx.
 3. [INFORMATIONAL] Redis recommended for sessions/queues/cache in production for scale.
 
 No CRITICAL or HIGH findings in the current implementation. All findings above are LOW/INFORMATIONAL and configuration-level.

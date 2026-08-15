@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Customer;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
@@ -12,6 +13,42 @@ use Tests\TestCase;
 class AuthenticationTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_staff_logout_is_audited(): void
+    {
+        $this->seed(\Database\Seeders\RolePermissionSeeder::class);
+
+        $admin = User::factory()->create(['email' => 'admin@example.com', 'password' => Hash::make('StrongPass1'), 'email_verified_at' => now()]);
+        $admin->roles()->attach(Role::where('name', 'SUPER_ADMIN')->firstOrFail());
+
+        $this->post(route('login'), [
+            'email' => $admin->email,
+            'password' => 'StrongPass1',
+        ])->assertRedirect(route('admin.dashboard'));
+
+        $this->post(route('logout'))->assertRedirect('/');
+
+        $this->assertDatabaseHas('admin_activity_logs', [
+            'user_id' => $admin->id,
+            'type' => 'logout',
+        ]);
+    }
+
+    public function test_customer_logout_is_not_audited(): void
+    {
+        $this->seed(\Database\Seeders\RolePermissionSeeder::class);
+
+        $user = User::factory()->create(['password' => Hash::make('StrongPass1')]);
+
+        $this->post(route('login'), [
+            'email' => $user->email,
+            'password' => 'StrongPass1',
+        ])->assertRedirect(route('dashboard'));
+
+        $this->post(route('logout'))->assertRedirect('/');
+
+        $this->assertDatabaseMissing('admin_activity_logs', ['type' => 'logout']);
+    }
 
     public function test_user_can_view_login_page(): void
     {

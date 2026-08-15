@@ -72,6 +72,18 @@ class AuthenticatedSessionController extends Controller
 
     public function destroy(Request $request): RedirectResponse
     {
+        $user = Auth::user();
+
+        if ($user?->isStaff()) {
+            AdminActivityLog::create([
+                'user_id' => $user->id,
+                'type' => 'logout',
+                'description' => 'Admin logout',
+                'ip' => $request->ip(),
+                'user_agent' => substr((string) $request->userAgent(), 0, 255),
+            ]);
+        }
+
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();

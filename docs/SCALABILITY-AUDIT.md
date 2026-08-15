@@ -2,8 +2,8 @@
 
 ## Database
 - Proper indexes on: orders(order_number unique), orders(tracking_token unique), orders(customer_id), orders(status), orders(payment_status), payments(order_id), order_field_values(order_id), service_fields(service_id), services(category_id), announcements(active window).
+- Composite indexes added: `orders(status, payment_status)`, `orders(status, created_at)`, `orders(created_at)`, `payments(order_id, status)`, `payments(created_at)` for dashboard counting and date-range reports at scale.
 - Query efficiency: reports aggregate at the DB layer, no full-table loads.
-- Recommendation: add composite index on orders(status, payment_status) for dashboard counting at scale.
 
 ## Queries
 - Eager loading used on order detail, dashboard, admin lists.
@@ -27,7 +27,7 @@
 - Recommendation: Redis session driver for horizontal scaling.
 
 ## Images
-- Uploads validated (MIME/size); recommendation: add on-the-fly resizing/WebP for performance.
+- Uploads validated (MIME/size); on-the-fly resizing/WebP serving with disk cache implemented (query params `?w=`/`?h=`).
 
 ## Reports
 - Aggregated in SQL, grouped, limited.

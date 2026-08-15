@@ -9,7 +9,6 @@ use App\Models\HomepageShowcase;
 use App\Models\Service;
 use App\Models\ServiceCategory;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -87,16 +86,16 @@ class HomeController extends Controller
         return view("pages.{$slug}");
     }
 
-    public function showcaseImage(HomepageShowcase $showcase, string $variant)
+    public function showcaseImage(Request $request, HomepageShowcase $showcase, string $variant)
     {
         abort_unless(in_array($variant, ['image', 'desktop_image', 'mobile_image'], true), 404);
 
         $path = $showcase->{$variant};
         abort_if(! $path, 404);
 
-        $disk = Storage::disk('local');
-        abort_unless($disk->exists($path), 404);
+        $width = $request->integer('w') ?: null;
+        $height = $request->integer('h') ?: null;
 
-        return $disk->response($path);
+        return \App\Helpers\ImageOptimizer::serve('local', $path, $width, $height);
     }
 }
