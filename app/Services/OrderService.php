@@ -176,6 +176,7 @@ class OrderService
                     'amount' => $price,
                     'currency' => $service->currency,
                     'status' => 'UNPAID',
+                    'payment_method_id' => $service->payment_method_id,
                 ]);
             }
 

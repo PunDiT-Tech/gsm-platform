@@ -51,6 +51,7 @@ class PaymentFlowTest extends TestCase
             'sort_order' => 1,
         ]);
         PaymentMethod::create(['code' => 'BANK_TRANSFER', 'name' => 'Bank Transfer', 'is_active' => true, 'sort_order' => 1]);
+        PaymentMethod::create(['code' => 'CRYPTO', 'name' => 'Crypto', 'is_active' => true, 'sort_order' => 2]);
     }
 
     protected function registeredOrder(): array
@@ -238,5 +239,57 @@ class PaymentFlowTest extends TestCase
         ])->assertSessionHas('status');
 
         $this->assertDatabaseHas('refunds', ['amount' => 25.00]);
+    }
+
+    public function test_service_restricted_payment_method_is_preassigned(): void
+    {
+        $method = PaymentMethod::where('code', 'CRYPTO')->firstOrFail();
+        $this->service->update(['payment_method_id' => $method->id]);
+
+        [$user, $order] = $this->registeredOrder();
+        $payment = $order->payments()->first();
+
+        $this->assertSame($method->id, (int) $payment->payment_method_id);
+    }
+
+    public function test_payment_page_only_lists_restricted_method(): void
+    {
+        $method = PaymentMethod::where('code', 'CRYPTO')->firstOrFail();
+        $this->service->update(['payment_method_id' => $method->id]);
+
+        [$user, $order] = $this->registeredOrder();
+
+        $response = $this->actingAs($user)->get(route('orders.pay', $order));
+        $response->assertOk();
+        $response->assertSee('Crypto');
+        $response->assertDontSee('Bank Transfer');
+    }
+
+    public function test_selecting_method_outside_override_is_rejected(): void
+    {
+        $override = PaymentMethod::where('code', 'CRYPTO')->firstOrFail();
+        $this->service->update(['payment_method_id' => $override->id]);
+
+        [$user, $order] = $this->registeredOrder();
+        $bank = PaymentMethod::where('code', 'BANK_TRANSFER')->firstOrFail();
+
+        $this->actingAs($user)->post(route('orders.payment-method', $order), [
+            'method_id' => $bank->id,
+        ])->assertStatus(422);
+    }
+
+    public function test_selecting_overridden_method_is_accepted(): void
+    {
+        $override = PaymentMethod::where('code', 'CRYPTO')->firstOrFail();
+        $this->service->update(['payment_method_id' => $override->id]);
+
+        [$user, $order] = $this->registeredOrder();
+        $payment = $order->payments()->first();
+
+        $this->actingAs($user)->post(route('orders.payment-method', $order), [
+            'method_id' => $override->id,
+        ])->assertRedirect(route('orders.pay', $order));
+
+        $this->assertDatabaseHas('payments', ['id' => $payment->id, 'payment_method_id' => $override->id]);
     }
 }

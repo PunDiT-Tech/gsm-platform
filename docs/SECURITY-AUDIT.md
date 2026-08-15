@@ -45,7 +45,7 @@ Status: automated review of the implemented application. Severities: CRITICAL / 
 | Check | Result | Notes |
 |---|---|---|
 | CSRF | PASS | Laravel default on all POST/PUT/DELETE |
-| Secure cookies | PARTIAL | `SESSION_SECURE_COOKIE=true` required in production |
+| Secure cookies | PARTIAL | `SESSION_SECURE_COOKIE=true` required in production; enforced via `checkSecureCookie` health probe |
 | HTTPS | PARTIAL | Requires Nginx config (see DEPLOYMENT.md) |
 | Security headers | PARTIAL | X-Frame-Options etc. in Nginx template |
 | Secrets in code | PASS | Secrets only via `.env`, `.env` git-ignored |

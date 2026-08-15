@@ -14,7 +14,7 @@ class Service extends Model
 
     protected $fillable = [
         'category_id', 'name', 'slug', 'short_description', 'full_description', 'icon', 'image',
-        'price', 'currency', 'processing_time', 'service_type', 'payment_required',
+        'price', 'currency', 'processing_time', 'service_type', 'payment_required', 'payment_method_id',
         'is_active', 'is_featured', 'sort_order', 'customer_notice', 'customer_instructions',
         'admin_internal_notes', 'consent_required',
     ];
@@ -30,6 +30,11 @@ class Service extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(ServiceCategory::class, 'category_id');
+    }
+
+    public function paymentMethod(): BelongsTo
+    {
+        return $this->belongsTo(PaymentMethod::class, 'payment_method_id');
     }
 
     public function fields(): HasMany

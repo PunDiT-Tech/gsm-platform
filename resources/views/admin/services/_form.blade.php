@@ -101,6 +101,20 @@
     </div>
 </div>
 
+<div class="grid grid-cols-2 gap-4">
+    <div>
+        <label for="payment_method_id" class="block text-sm font-medium text-gray-700">Restrict payment method (optional)</label>
+        <select id="payment_method_id" name="payment_method_id"
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
+            <option value="">Any enabled method</option>
+            @foreach ($methods as $method)
+                <option value="{{ $method->id }}" @selected(old('payment_method_id', $service?->payment_method_id) == $method->id)>{{ $method->name }}</option>
+            @endforeach
+        </select>
+        <p class="mt-1 text-xs text-gray-500">Limit checkout to a single payment method for this service.</p>
+    </div>
+</div>
+
 <div>
     <label for="customer_notice" class="block text-sm font-medium text-gray-700">Customer notice (public)</label>
     <textarea id="customer_notice" name="customer_notice" rows="2"

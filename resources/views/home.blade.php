@@ -2,30 +2,99 @@
 
 @section('title', config('app.name') . ' — Professional Device Services')
 
+@push('head')
+<style>
+    #showcase-track .showcase-slide .showcase-content > * {
+        opacity: 0;
+    }
+    #showcase-track .showcase-slide.no-anim .showcase-content > * {
+        opacity: 1;
+        animation: none;
+    }
+    #showcase-track .showcase-slide.is-active .showcase-content > * {
+        opacity: 1;
+        animation: var(--sc-anim, showcase-fade) .8s ease-out both;
+    }
+    #showcase-track .showcase-slide.is-active .showcase-content > *:nth-child(2) { animation-delay: .12s; }
+    #showcase-track .showcase-slide.is-active .showcase-content > *:nth-child(3) { animation-delay: .24s; }
+    @keyframes showcase-fade {
+        from { opacity: 0; transform: translateY(14px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes showcase-slide {
+        from { opacity: 0; transform: translateX(60px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes showcase-zoom {
+        from { opacity: 0; transform: scale(.85); }
+        to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes showcase-float {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes showcase-zoom-fade {
+        from { opacity: 0; transform: scale(.9); }
+        to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes showcase-parallax {
+        from { opacity: .4; transform: translateY(40px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+@endpush
+
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const track = document.getElementById('showcase-track');
     if (!track) return;
-    const slides = Array.from(track.children);
+    const slides = Array.from(track.querySelectorAll('.showcase-slide'));
     if (slides.length <= 1) return;
+    const dots = Array.from(document.querySelectorAll('#showcase-dots span'));
     let index = 0;
-    function go(i) {
+
+    function go(i, dir) {
         index = (i + slides.length) % slides.length;
         track.style.transform = `translateX(-${index * 100}%)`;
+        slides.forEach((s, j) => {
+            s.classList.toggle('is-active', j === index);
+            const anim = (s.dataset.animation || 'NONE').toUpperCase();
+            s.classList.toggle('no-anim', reduce || anim === 'NONE');
+            if (j === index && !reduce && anim !== 'NONE') {
+                s.style.setProperty('--sc-anim', `showcase-${anim.toLowerCase()}`);
+            }
+        });
+        dots.forEach((d, j) => {
+            d.classList.toggle('bg-white', j === index);
+            d.classList.toggle('bg-white/40', j !== index);
+        });
     }
-    function next() { go(index + 1); }
+
+    function next() { go(index + 1, 1); }
+    function prev() { go(index - 1, -1); }
+
     let timer = reduce ? null : setInterval(next, 5000);
     const wrap = document.getElementById('showcase-wrap');
     wrap.addEventListener('mouseenter', () => timer && clearInterval(timer));
     wrap.addEventListener('mouseleave', () => { if (!reduce) timer = setInterval(next, 5000); });
+
     let startX = 0;
-    wrap.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, { passive: true });
+    let startY = 0;
+    wrap.addEventListener('touchstart', e => {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+    }, { passive: true });
     wrap.addEventListener('touchend', e => {
         const dx = e.changedTouches[0].clientX - startX;
-        if (Math.abs(dx) > 50) next();
+        const dy = e.changedTouches[0].clientY - startY;
+        if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
+            if (dx < 0) next(); else prev();
+        }
     }, { passive: true });
+
+    go(0);
 });
 </script>
 @endpush
@@ -45,12 +114,12 @@ document.addEventListener('DOMContentLoaded', function () {
         <section id="showcase-wrap" class="relative overflow-hidden bg-gray-900">
             <div id="showcase-track" class="flex transition-transform duration-700 ease-out">
                 @foreach ($showcases as $showcase)
-                    <div class="min-w-full">
+                    <div class="min-w-full showcase-slide" data-animation="{{ $showcase->animation ?? 'NONE' }}">
                         @if ($showcase->desktop_image || $showcase->image)
                             <div class="relative h-[420px] md:h-[520px]">
                                 <img src="{{ route('showcase.image', [$showcase, $showcase->desktop_image ? 'desktop_image' : 'image']) }}" alt="{{ $showcase->title ?? 'Showcase' }}" class="w-full h-full object-cover">
                                 <div class="absolute inset-0 bg-black/40"></div>
-                                <div class="relative max-w-7xl mx-auto px-4 sm:px-6 py-20 md:py-28 text-center text-white">
+                                <div class="showcase-content relative max-w-7xl mx-auto px-4 sm:px-6 py-20 md:py-28 text-center text-white">
                                     <h1 class="text-4xl md:text-5xl font-bold leading-tight">{{ $showcase->title ?? 'Professional Device Services' }}</h1>
                                     @if ($showcase->subtitle)
                                         <p class="mt-4 text-lg text-gray-200 max-w-2xl mx-auto">{{ $showcase->subtitle }}</p>
@@ -61,7 +130,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 </div>
                             </div>
                         @else
-                            <div class="max-w-7xl mx-auto px-4 sm:px-6 py-20 md:py-28 text-center text-white">
+                            <div class="showcase-content max-w-7xl mx-auto px-4 sm:px-6 py-20 md:py-28 text-center text-white">
                                 <h1 class="text-4xl md:text-5xl font-bold leading-tight">{{ $showcase->title ?? 'Professional Device Services' }}</h1>
                                 @if ($showcase->subtitle)
                                     <p class="mt-4 text-lg text-gray-300 max-w-2xl mx-auto">{{ $showcase->subtitle }}</p>
@@ -74,7 +143,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     </div>
                 @endforeach
             </div>
-            <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+            <div id="showcase-dots" class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
                 @foreach ($showcases as $i => $showcase)
                     <span class="w-2 h-2 rounded-full bg-white/40"></span>
                 @endforeach

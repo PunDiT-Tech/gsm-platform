@@ -3,7 +3,12 @@
 @section('title', 'Dashboard')
 
 @section('panel')
-    <h2 class="text-2xl font-bold text-gray-900 mb-6">Welcome, {{ auth()->user()->name }}</h2>
+    <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-bold text-gray-900">Welcome, {{ auth()->user()->name }}</h2>
+        @if ($unread > 0)
+            <a href="{{ route('orders.index') }}" class="px-2.5 py-1 rounded-full text-xs bg-blue-600 text-white font-medium hover:bg-blue-700">{{ $unread }} unread message{{ $unread === 1 ? '' : 's' }}</a>
+        @endif
+    </div>
 
     @if ($announcements->isNotEmpty())
         <div class="mb-8 space-y-3">

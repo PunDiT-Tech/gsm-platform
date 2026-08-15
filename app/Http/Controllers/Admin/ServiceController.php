@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\PaymentMethod;
 use App\Models\Service;
 use App\Models\ServiceCategory;
 use Illuminate\Http\RedirectResponse;
@@ -22,8 +23,9 @@ class ServiceController extends Controller
     public function create(): View
     {
         $categories = ServiceCategory::orderBy('sort_order')->get();
+        $methods = PaymentMethod::where('is_active', true)->orderBy('sort_order')->get();
 
-        return view('admin.services.create', compact('categories'));
+        return view('admin.services.create', compact('categories', 'methods'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -44,8 +46,9 @@ class ServiceController extends Controller
     {
         $service->load(['fields.options', 'informationBlocks', 'links', 'images']);
         $categories = ServiceCategory::orderBy('sort_order')->get();
+        $methods = PaymentMethod::where('is_active', true)->orderBy('sort_order')->get();
 
-        return view('admin.services.edit', compact('service', 'categories'));
+        return view('admin.services.edit', compact('service', 'categories', 'methods'));
     }
 
     public function update(Request $request, Service $service): RedirectResponse
@@ -108,6 +111,7 @@ class ServiceController extends Controller
             'processing_time' => ['nullable', 'string', 'max:255'],
             'service_type' => ['required', 'in:STANDARD,PAID,FREE,EXTERNAL'],
             'payment_required' => ['boolean'],
+            'payment_method_id' => ['nullable', 'exists:payment_methods,id'],
             'is_active' => ['boolean'],
             'is_featured' => ['boolean'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
@@ -134,6 +138,7 @@ class ServiceController extends Controller
         $data['is_featured'] = $request->boolean('is_featured');
         $data['consent_required'] = $request->boolean('consent_required');
         $data['sort_order'] = $data['sort_order'] ?? 0;
+        $data['payment_method_id'] = $data['payment_method_id'] ?: null;
 
         return $data;
     }

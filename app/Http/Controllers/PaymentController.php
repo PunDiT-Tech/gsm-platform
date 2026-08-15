@@ -23,8 +23,8 @@ class PaymentController extends Controller
             abort(404);
         }
 
-        $order->load(['payments.method']);
-        $methods = PaymentMethod::where('is_active', true)->orderBy('sort_order')->get();
+        $order->load(['payments.method', 'service']);
+        $methods = $this->allowedMethods($order);
 
         return view('orders.payment', compact('order', 'token', 'methods'));
     }
@@ -42,6 +42,14 @@ class PaymentController extends Controller
             'method_id' => ['required', 'exists:payment_methods,id'],
             'token' => ['nullable', 'string'],
         ]);
+
+        $method = PaymentMethod::where('id', $request->method_id)->where('is_active', true)->first();
+
+        abort_unless($method, 422);
+
+        if ($order->service?->payment_method_id && $order->service->payment_method_id !== (int) $request->method_id) {
+            abort(422, 'This payment method is not available for the selected service.');
+        }
 
         DB::transaction(function () use ($order, $request) {
             $payment = $order->payments()->where('status', 'UNPAID')->latest()->first();
@@ -107,5 +115,16 @@ class PaymentController extends Controller
         }
 
         return back()->with('status', 'Payment proof submitted. We will review it shortly.');
+    }
+
+    protected function allowedMethods(Order $order)
+    {
+        $query = PaymentMethod::where('is_active', true);
+
+        if ($order->service?->payment_method_id) {
+            $query->where('id', $order->service->payment_method_id);
+        }
+
+        return $query->orderBy('sort_order')->get();
     }
 }

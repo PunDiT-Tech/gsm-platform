@@ -16,10 +16,26 @@ class MyOrdersController extends Controller
         $customer = request()->user()->customer;
 
         $orders = $customer
-            ? $customer->orders()->latest()->paginate(15)
+            ? $customer->orders()
+                ->withCount([
+                    'messages as unread_staff_messages' => fn ($q) => $q
+                        ->where('type', 'CUSTOMER')
+                        ->whereNotNull('user_id')
+                        ->whereNull('read_at'),
+                ])
+                ->latest()
+                ->paginate(15)
             : collect();
 
-        return view('orders.index', compact('orders'));
+        $unread = $customer
+            ? OrderMessage::whereHas('order', fn ($q) => $q->where('customer_id', $customer->id))
+                ->where('type', 'CUSTOMER')
+                ->whereNotNull('user_id')
+                ->whereNull('read_at')
+                ->count()
+            : 0;
+
+        return view('orders.index', compact('orders', 'unread'));
     }
 
     public function show(Order $order): View

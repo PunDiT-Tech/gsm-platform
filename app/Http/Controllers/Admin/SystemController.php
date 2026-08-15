@@ -24,6 +24,8 @@ class SystemController extends Controller
             'scheduler' => $this->checkScheduler(),
             'telegram' => $this->checkTelegram(),
             'mail' => $this->checkMail(),
+            'app_debug' => $this->checkAppDebug(),
+            'secure_cookie' => $this->checkSecureCookie(),
         ];
 
         $diskUsage = $this->diskUsage();
@@ -95,12 +97,63 @@ class SystemController extends Controller
             return ['status' => 'WARNING', 'note' => 'Telegram is disabled.'];
         }
 
-        return ['status' => 'CONNECTED', 'note' => 'Enabled'];
+        $token = $setting->bot_token ? \Illuminate\Support\Facades\Crypt::decryptString($setting->bot_token) : null;
+
+        if (! $token || ! $setting->chat_id) {
+            return ['status' => 'FAILED', 'note' => 'Token or chat id missing.'];
+        }
+
+        try {
+            $response = \Illuminate\Support\Facades\Http::timeout(10)
+                ->get("https://api.telegram.org/bot{$token}/getMe");
+
+            if ($response->successful() && $response->json('ok') === true) {
+                return ['status' => 'CONNECTED', 'note' => 'Bot "' . ($response->json('result.username') ?? '?') . '" reachable.'];
+            }
+
+            return ['status' => 'FAILED', 'note' => 'Telegram API rejected the token.'];
+        } catch (\Throwable $e) {
+            return ['status' => 'FAILED', 'note' => 'Network error: ' . $e->getMessage()];
+        }
     }
 
     protected function checkMail(): array
     {
-        return ['status' => 'CONNECTED', 'note' => 'Driver: ' . config('mail.default')];
+        $driver = config('mail.default');
+
+        if ($driver === 'log' || $driver === 'array') {
+            return ['status' => 'WARNING', 'note' => "Driver '{$driver}' is not a real delivery channel."];
+        }
+
+        try {
+            $manager = app('mail.manager');
+            $mailer = $manager->mailer($driver);
+            $transport = $mailer->getSymfonyTransport();
+
+            $transport->start();
+
+            return ['status' => 'CONNECTED', 'note' => 'Mail transport connected (' . $driver . ').'];
+        } catch (\Throwable $e) {
+            return ['status' => 'FAILED', 'note' => 'Could not connect: ' . $e->getMessage()];
+        }
+    }
+
+    protected function checkAppDebug(): array
+    {
+        if (config('app.debug')) {
+            return ['status' => 'WARNING', 'note' => 'APP_DEBUG is enabled; disable in production.'];
+        }
+
+        return ['status' => 'CONNECTED', 'note' => 'APP_DEBUG disabled.'];
+    }
+
+    protected function checkSecureCookie(): array
+    {
+        if (config('session.secure') !== true && app()->environment('production')) {
+            return ['status' => 'WARNING', 'note' => 'SESSION_SECURE_COOKIE must be true in production.'];
+        }
+
+        return ['status' => 'CONNECTED', 'note' => 'Secure session cookie configured.'];
     }
 
     protected function diskUsage(): array
