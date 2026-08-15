@@ -56,6 +56,7 @@ php artisan test
 - `docs/STAGED-PLAN.md`
 - `docs/INSTALLATION.md`
 - `docs/DEPLOYMENT.md`
+- `docs/PRE-LAUNCH-CHECKLIST.md`
 - `docs/BACKUP-RESTORE.md`
 - `docs/TROUBLESHOOTING.md`
 - `docs/SECURITY-AUDIT.md`
